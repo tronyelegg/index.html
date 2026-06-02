@@ -2,7 +2,7 @@ name: Auto Update Nikke DB
 
 on:
   schedule:
-    - cron: '0 0 * * 4'
+    - cron: '0 9 * * 4'
   workflow_dispatch: 
 
 jobs:
