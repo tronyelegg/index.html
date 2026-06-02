@@ -14,39 +14,35 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 💡 [반응형 패치] 버튼 컨테이너 자동 줄바꿈 허용 */
+        /* 💡 상단 컨트롤 버튼 (테스트 버튼 삭제 및 2개 버튼 반반 배치) */
         .top-controls { 
             width: 100%; max-width: 1000px;
-            margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
+            margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; 
         }
-        button { 
-            flex: 1 1 auto; /* 모바일에서 버튼 폭 자동 조절 */
-            min-width: 150px; padding: 12px 20px; font-size: 15px; font-weight: bold; cursor: pointer; 
+        .top-controls button { 
+            flex: 1; /* 남은 공간을 똑같이 나누어 가짐 */
+            padding: 14px 10px; font-size: 15px; font-weight: bold; cursor: pointer; 
             border-radius: 8px; border: none; outline: none; transition: 0.2s; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: white; text-align: center;
         }
-        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        #testBtn { background-color: #3F51B5; }
+        .top-controls button:hover { transform: translateY(-2px); filter: brightness(1.1); }
         #clearBtn { background-color: #E91E63; display: none; }
         #downloadBtn { background-color: #00E676; color: #000; display: none; }
 
-        /* 💡 [반응형 패치] 모바일에서 스크롤 가능하게 만드는 래퍼 컨테이너 */
+        /* 💡 [모바일 패치] 스펙 카드를 잘리지 않게 축소시켜주는 래퍼 */
         .capture-wrapper {
             width: 100%;
             max-width: 1000px;
-            overflow-x: auto; /* 모바일 폭이 좁아지면 좌우 스와이프 허용 */
             margin-bottom: 30px;
-            border-radius: 16px;
+            overflow: hidden; 
         }
 
-        /* 📸 실제 이미지로 캡처될 영역 (절대 크기 유지) */
+        /* 📸 실제 이미지로 캡처될 영역 (해상도 유지를 위해 1000px 고정) */
         #capture-area { 
             background: linear-gradient(135deg, #1a1e2e, #12151f); 
             border: 2px solid #4FC3F7; 
-            width: 1000px; /* 고품질 캡처를 위해 해상도 고정 */
-            min-width: 1000px; 
-            padding: 30px; 
-            border-radius: 16px; 
+            width: 1000px; min-width: 1000px; 
+            padding: 30px; border-radius: 16px; 
             box-shadow: 0 0 25px rgba(79, 195, 247, 0.15); 
             box-sizing: border-box;
         }
@@ -85,12 +81,12 @@
 
         .footer { margin-top: 20px; text-align: right; font-size: 11px; color: #4f5b82; }
 
-        /* 💡 [반응형 패치] 하단 목록 넓이를 100%로 가변적으로 변경 */
         .pool-title { width: 100%; max-width: 1000px; text-align: left; font-size: 18px; color: #a6accd; border-bottom: 1px solid #4f5b82; padding-bottom: 10px; margin-bottom: 15px; box-sizing: border-box; }
+        
+        /* 💡 캐릭터 풀 그리드 기본 세팅 */
         .char-grid { 
             width: 100%; max-width: 1000px; 
             display: grid; 
-            /* PC 기준 폭 130px, 공간이 남으면 알아서 늘어남 */
             grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
             gap: 12px; padding-bottom: 50px; box-sizing: border-box;
         }
@@ -98,41 +94,39 @@
         .grid-item:hover { border-color: #4FC3F7; box-shadow: 0 0 15px rgba(79,195,247,0.4); }
         .grid-item.selected { opacity: 0.3; pointer-events: none; border-color: #E91E63; filter: grayscale(100%); }
         
-        .grid-img { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background-size: cover; background-position: center 15%; background-repeat: no-repeat;
-            z-index: 1; transition: 0.3s; 
-        }
+        .grid-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center 15%; background-repeat: no-repeat; z-index: 1; transition: 0.3s; }
         .grid-item:hover .grid-img { transform: scale(1.1); }
         .grid-content { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 60%, transparent 100%); z-index: 2; padding: 15px 5px 8px 5px; text-align: center; box-sizing: border-box; }
         .grid-name { font-size: 13px; font-weight: bold; color: #fff; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 1px 1px 2px #000; }
         .grid-cp { font-size: 12px; color: #FFD700; text-shadow: 1px 1px 2px #000; font-weight: bold; }
         .placeholder { width: 100%; text-align: center; color: #4f5b82; padding: 50px 0; grid-column: 1 / -1; }
 
-        /* 💡 모바일 전용 반응형 쿼리 적용 (가로 폭 600px 이하 스마트폰 기준) */
+        /* 💡 [모바일 패치] 스마트폰(가로 600px 이하)에서는 정확히 한 줄에 4명씩 출력되도록 사이즈 조정 */
         @media (max-width: 600px) {
             body { padding: 10px; }
             .char-grid { 
-                /* 모바일에서는 카드 크기를 조금 더 작게(105px) 만들어서 한 줄에 3~4명이 예쁘게 들어가도록 조정 */
-                grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); 
-                gap: 8px; 
+                grid-template-columns: repeat(4, 1fr); 
+                gap: 6px; 
             }
-            .grid-item { height: 130px; }
+            .grid-item { height: 110px; }
             .grid-name { font-size: 11px; margin-bottom: 2px; }
-            .grid-cp { font-size: 11px; }
-            .pool-title { font-size: 16px; }
+            .grid-cp { font-size: 10px; }
+            .pool-title { font-size: 15px; }
+        }
+        @media (max-width: 400px) {
+            .grid-item { height: 95px; }
+            .grid-name { font-size: 10px; }
+            .grid-cp { font-size: 9px; }
         }
     </style>
 </head>
 <body>
 
     <div class="top-controls">
-        <button id="testBtn">테스트 데이터 로드</button>
         <button id="clearBtn">파티 초기화</button>
         <button id="downloadBtn">📸 스펙 카드 이미지 저장</button>
     </div>
 
-    <!-- 스와이프를 허용하는 래퍼 추가 -->
     <div class="capture-wrapper">
         <div id="capture-area">
             <div class="header">
@@ -159,6 +153,24 @@
     <script>
         let allCharacters = [];
         let selectedCharacters = [];
+
+        // 💡 화면 크기에 맞춰 스펙 카드를 축소시키는 스마트 스케일링 기능
+        function adjustScale() {
+            const wrapper = document.querySelector('.capture-wrapper');
+            const area = document.getElementById('capture-area');
+            const wWidth = wrapper.clientWidth;
+            
+            if (wWidth < 1000) {
+                const s = wWidth / 1000;
+                area.style.transform = `scale(${s})`;
+                area.style.transformOrigin = 'top left';
+                wrapper.style.height = `${area.offsetHeight * s}px`;
+            } else {
+                area.style.transform = 'none';
+                wrapper.style.height = 'auto';
+            }
+        }
+        window.addEventListener('resize', adjustScale);
 
         function renderSlots() {
             const container = document.getElementById('slotsContainer');
@@ -192,6 +204,9 @@
             document.getElementById('totalCp').innerText = partyCp.toLocaleString();
             document.getElementById('downloadBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
             document.getElementById('clearBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
+            
+            // 컨텐츠가 채워진 후 스케일 재계산
+            setTimeout(adjustScale, 50);
         }
 
         function renderGrid() {
@@ -238,32 +253,32 @@
             if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { initData(event.data.payload); }
         });
 
+        // 💡 캡처 시에는 모바일에서도 PC 화질(1000px)로 찍히도록 일시적으로 스케일 복원
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const captureTarget = document.getElementById('capture-area');
-            // html2canvas가 모바일에서도 스크롤 여부와 상관없이 무조건 1000px 영역을 찍어내도록 지정
-            html2canvas(captureTarget, { backgroundColor: '#12151f', scale: 2, scrollX: 0, scrollY: 0 }).then(canvas => {
+            const wrapper = document.querySelector('.capture-wrapper');
+            
+            // 1. 임시로 스케일 해제 (원래 1000px 크기로 복구)
+            const originalTransform = captureTarget.style.transform;
+            captureTarget.style.transform = 'none';
+            wrapper.style.height = 'auto';
+
+            // 2. 캡처 진행
+            html2canvas(captureTarget, { 
+                backgroundColor: '#12151f', 
+                scale: 2 
+            }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `NIKKE_Party_${document.getElementById('playerName').innerText}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+                
+                // 3. 캡처 완료 후 다시 모바일용 스케일 적용
+                adjustScale();
             });
         });
 
-        document.getElementById('testBtn').addEventListener('click', () => {
-            const dummyData = {
-                playerName: "지휘관(테스트)", server: "Korea", synchroLevel: 481,
-                characters: [
-                    { name: "레드 후드", code: 5101, break: "5코강", skill: "10/10/10", equip: "5/5/5/0", overload: "우코:97.0%, 공증:43.7%", cp: 259728 },
-                    { name: "크라운", code: 5100, break: "명함", skill: "10/10/10", equip: "5/5/0/0", overload: "-", cp: 201000 },
-                    { name: "모더니아", code: 112, break: "3돌", skill: "10/10/10", equip: "5/5/5/5", overload: "장탄:112%, 공증:30%", cp: 215000 },
-                    { name: "리타", code: 111, break: "풀코", skill: "10/4/10", equip: "5/5/5/5", overload: "차속:14%, 장탄:60%", cp: 230000 },
-                    { name: "아스카", code: 5088, break: "풀돌", skill: "10/10/10", equip: "0/0/0/0", overload: "-", cp: 164762 },
-                    { name: "레이", code: 5089, break: "명함", skill: "4/4/4", equip: "0/0/0/0", overload: "-", cp: 140000 }
-                ]
-            };
-            initData(dummyData);
-        });
-
+        // 초기 로딩 시 빈 슬롯 렌더링
         renderSlots();
     </script>
 </body>
