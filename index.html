@@ -14,37 +14,29 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 💡 상단 컨트롤 버튼 (테스트 버튼 삭제 및 2개 버튼 반반 배치) */
+        /* 💡 [UI 패치] 버튼 컨테이너 (PC: 한 줄에 3개) */
         .top-controls { 
             width: 100%; max-width: 1000px;
-            margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; 
+            margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
         }
         .top-controls button { 
-            flex: 1; /* 남은 공간을 똑같이 나누어 가짐 */
-            padding: 14px 10px; font-size: 15px; font-weight: bold; cursor: pointer; 
+            flex: 1 1 calc(33.333% - 10px); /* PC에서는 3등분 */
+            min-width: 120px; padding: 14px 10px; font-size: 15px; font-weight: bold; cursor: pointer; 
             border-radius: 8px; border: none; outline: none; transition: 0.2s; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: white; text-align: center;
         }
         .top-controls button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        
+        #uploadBtn { background-color: #9C27B0; }
         #clearBtn { background-color: #E91E63; display: none; }
         #downloadBtn { background-color: #00E676; color: #000; display: none; }
 
-        /* 💡 [모바일 패치] 스펙 카드를 잘리지 않게 축소시켜주는 래퍼 */
-        .capture-wrapper {
-            width: 100%;
-            max-width: 1000px;
-            margin-bottom: 30px;
-            overflow: hidden; 
-        }
+        .capture-wrapper { width: 100%; max-width: 1000px; margin-bottom: 30px; overflow: hidden; }
 
-        /* 📸 실제 이미지로 캡처될 영역 (해상도 유지를 위해 1000px 고정) */
         #capture-area { 
             background: linear-gradient(135deg, #1a1e2e, #12151f); 
-            border: 2px solid #4FC3F7; 
-            width: 1000px; min-width: 1000px; 
-            padding: 30px; border-radius: 16px; 
-            box-shadow: 0 0 25px rgba(79, 195, 247, 0.15); 
-            box-sizing: border-box;
+            border: 2px solid #4FC3F7; width: 1000px; min-width: 1000px; 
+            padding: 30px; border-radius: 16px; box-shadow: 0 0 25px rgba(79, 195, 247, 0.15); box-sizing: border-box;
         }
 
         .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; }
@@ -54,24 +46,12 @@
         .header .total-cp h2 { margin: 0; font-size: 28px; color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
 
         .slots-container { display: flex; gap: 15px; justify-content: center; min-height: 220px;}
-        .slot { 
-            flex: 1; background: #0f111a; border: 2px dashed #4f5b82; 
-            border-radius: 12px; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; cursor: pointer;
-            transition: 0.2s; position: relative; overflow: hidden; text-align: center;
-        }
+        .slot { flex: 1; background: #0f111a; border: 2px dashed #4f5b82; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; text-align: center; }
         .slot.filled { border: 2px solid #00E676; }
         .slot:hover { border-color: #4FC3F7; }
-        
         .empty-icon { font-size: 48px; color: #4f5b82; font-weight: 100; z-index: 2; }
-        
-        .slot-img { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            background-size: cover; background-position: center 15%; background-repeat: no-repeat;
-            opacity: 0.35; z-index: 1; transition: 0.3s; 
-        }
+        .slot-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center 15%; background-repeat: no-repeat; opacity: 0.35; z-index: 1; transition: 0.3s; }
         .slot:hover .slot-img { opacity: 0.6; transform: scale(1.05); }
-
         .slot-content { position: relative; z-index: 2; width: 100%; padding: 15px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; }
         .slot-name { font-size: 16px; font-weight: bold; color: #fff; margin-bottom: 5px; word-break: keep-all; text-shadow: 1px 1px 3px #000; }
         .slot-badge { background-color: #E91E63; color: white; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -82,18 +62,10 @@
         .footer { margin-top: 20px; text-align: right; font-size: 11px; color: #4f5b82; }
 
         .pool-title { width: 100%; max-width: 1000px; text-align: left; font-size: 18px; color: #a6accd; border-bottom: 1px solid #4f5b82; padding-bottom: 10px; margin-bottom: 15px; box-sizing: border-box; }
-        
-        /* 💡 캐릭터 풀 그리드 기본 세팅 */
-        .char-grid { 
-            width: 100%; max-width: 1000px; 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); 
-            gap: 12px; padding-bottom: 50px; box-sizing: border-box;
-        }
+        .char-grid { width: 100%; max-width: 1000px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; padding-bottom: 50px; box-sizing: border-box; }
         .grid-item { background: #1e2233; border: 1px solid #2e344e; border-radius: 8px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; height: 160px; }
         .grid-item:hover { border-color: #4FC3F7; box-shadow: 0 0 15px rgba(79,195,247,0.4); }
         .grid-item.selected { opacity: 0.3; pointer-events: none; border-color: #E91E63; filter: grayscale(100%); }
-        
         .grid-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center 15%; background-repeat: no-repeat; z-index: 1; transition: 0.3s; }
         .grid-item:hover .grid-img { transform: scale(1.1); }
         .grid-content { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 60%, transparent 100%); z-index: 2; padding: 15px 5px 8px 5px; text-align: center; box-sizing: border-box; }
@@ -101,13 +73,15 @@
         .grid-cp { font-size: 12px; color: #FFD700; text-shadow: 1px 1px 2px #000; font-weight: bold; }
         .placeholder { width: 100%; text-align: center; color: #4f5b82; padding: 50px 0; grid-column: 1 / -1; }
 
-        /* 💡 [모바일 패치] 스마트폰(가로 600px 이하)에서는 정확히 한 줄에 4명씩 출력되도록 사이즈 조정 */
+        /* 💡 [모바일 패치] 모바일에서는 초기화/저장 버튼이 위에, 업로드 버튼이 아래에 100% 폭으로 깔림 */
         @media (max-width: 600px) {
             body { padding: 10px; }
-            .char-grid { 
-                grid-template-columns: repeat(4, 1fr); 
-                gap: 6px; 
-            }
+            .top-controls button { flex: 1 1 45%; } /* 상단 두 버튼 반반 */
+            #clearBtn { order: 1; }
+            #downloadBtn { order: 2; }
+            #uploadBtn { order: 3; flex: 1 1 100%; } /* 아랫줄 넓게 */
+
+            .char-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .grid-item { height: 110px; }
             .grid-name { font-size: 11px; margin-bottom: 2px; }
             .grid-cp { font-size: 10px; }
@@ -123,6 +97,8 @@
 <body>
 
     <div class="top-controls">
+        <input type="file" id="jsonUpload" accept=".json" style="display: none;">
+        <button id="uploadBtn">📁 JSON 스펙 업로드</button>
         <button id="clearBtn">파티 초기화</button>
         <button id="downloadBtn">📸 스펙 카드 이미지 저장</button>
     </div>
@@ -147,19 +123,17 @@
 
     <div class="pool-title">내 니케 목록 (클릭하여 상단 슬롯에 편성하세요)</div>
     <div class="char-grid" id="charGrid">
-        <div class="placeholder">게임에서 스크립트를 실행하여 데이터를 전송해주세요.</div>
+        <div class="placeholder">게임에서 스니펫을 실행하여 데이터를 전송하거나 JSON 파일을 업로드해주세요.</div>
     </div>
 
     <script>
         let allCharacters = [];
         let selectedCharacters = [];
 
-        // 💡 화면 크기에 맞춰 스펙 카드를 축소시키는 스마트 스케일링 기능
         function adjustScale() {
             const wrapper = document.querySelector('.capture-wrapper');
             const area = document.getElementById('capture-area');
             const wWidth = wrapper.clientWidth;
-            
             if (wWidth < 1000) {
                 const s = wWidth / 1000;
                 area.style.transform = `scale(${s})`;
@@ -204,8 +178,6 @@
             document.getElementById('totalCp').innerText = partyCp.toLocaleString();
             document.getElementById('downloadBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
             document.getElementById('clearBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
-            
-            // 컨텐츠가 채워진 후 스케일 재계산
             setTimeout(adjustScale, 50);
         }
 
@@ -249,36 +221,54 @@
             renderSlots(); renderGrid();
         }
 
+        // 💡 1. 자동 연동 (postMessage) 리스너
         window.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { initData(event.data.payload); }
         });
 
-        // 💡 캡처 시에는 모바일에서도 PC 화질(1000px)로 찍히도록 일시적으로 스케일 복원
+        // 💡 2. 수동 JSON 업로드 로직
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            document.getElementById('jsonUpload').click();
+        });
+
+        document.getElementById('jsonUpload').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && data.characters) {
+                        initData(data);
+                    } else {
+                        alert("🚨 올바른 NIKKE 스펙 JSON 파일이 아닙니다.");
+                    }
+                } catch (error) {
+                    alert("🚨 파일을 읽는 중 오류가 발생했습니다.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // 동일한 파일 재업로드 허용
+        });
+
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const captureTarget = document.getElementById('capture-area');
             const wrapper = document.querySelector('.capture-wrapper');
             
-            // 1. 임시로 스케일 해제 (원래 1000px 크기로 복구)
             const originalTransform = captureTarget.style.transform;
             captureTarget.style.transform = 'none';
             wrapper.style.height = 'auto';
 
-            // 2. 캡처 진행
-            html2canvas(captureTarget, { 
-                backgroundColor: '#12151f', 
-                scale: 2 
-            }).then(canvas => {
+            html2canvas(captureTarget, { backgroundColor: '#12151f', scale: 2, scrollX: 0, scrollY: 0 }).then(canvas => {
                 const link = document.createElement('a');
                 link.download = `NIKKE_Party_${document.getElementById('playerName').innerText}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                
-                // 3. 캡처 완료 후 다시 모바일용 스케일 적용
                 adjustScale();
             });
         });
 
-        // 초기 로딩 시 빈 슬롯 렌더링
         renderSlots();
     </script>
 </body>
