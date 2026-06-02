@@ -142,7 +142,7 @@
                     partyCp += char.cp;
                     slot.className = 'slot filled';
                     slot.innerHTML = `
-                        <img src="images/${char.code}.webp" class="slot-img" onerror="this.src='https://via.placeholder.com/150/1e2233/4f5b82?text=NO+IMG'">
+                        <img src="images/${char.code}.webp" class="slot-img" crossorigin="anonymous" onerror="this.onerror=null; this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='; this.style.opacity='0.1';">
                         <div class="slot-content">
                             <div class="slot-badge">${char.break}</div>
                             <div class="slot-name">${char.name}</div>
@@ -175,7 +175,7 @@
                 item.className = `grid-item ${isSelected ? 'selected' : ''}`;
                 
                 item.innerHTML = `
-                    <img src="images/${char.code}.webp" class="grid-img" onerror="this.src='https://via.placeholder.com/150/1e2233/4f5b82?text=NO+IMG'">
+                    <img src="images/${char.code}.webp" class="grid-img" crossorigin="anonymous" onerror="this.onerror=null; this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='; this.style.opacity='0.1';">
                     <div class="grid-content">
                         <div class="grid-name">${char.name}</div>
                         <div class="grid-cp">⚔️ ${char.cp.toLocaleString()}</div>
