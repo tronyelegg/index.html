@@ -14,9 +14,9 @@ WEAPON_MAP = {"SG": 1, "SMG": 2, "AR": 3, "MG": 4, "RL": 5, "SR": 6}
 
 def get_stat_enhance_id(rare, char_class, weapon):
     """A(등급) + B(클래스) + 0 + C(무기) 조합 공식"""
-    a = RARE_MAP.get(rare, 5)        # 기본값 SSR(5)
-    b = CLASS_MAP.get(char_class, 1) # 기본값 Attacker(1)
-    c = WEAPON_MAP.get(weapon, 3)    # 기본값 AR(3)
+    a = RARE_MAP.get(rare, 5)        
+    b = CLASS_MAP.get(char_class, 1) 
+    c = WEAPON_MAP.get(weapon, 3)    
     return int(f"{a}{b}0{c}")
 
 def main():
@@ -31,18 +31,31 @@ def main():
 
     print("🔄 2. Gist에서 내 기존 메인 DB 다운로드 중...")
     gist_url = f"https://api.github.com/gists/{GIST_ID}"
-    gist_resp = requests.get(gist_url).json()
     
-    if "files" not in gist_resp:
-        print("🚨 Gist 데이터를 불러올 수 없습니다. GIST_TOKEN이나 GIST_ID를 확인해주세요.")
+    # 💡 [핵심 픽스 1] GET 요청에도 인증 토큰을 넣어 깃허브 호출 제한(Rate Limit)을 피합니다.
+    headers = {"Accept": "application/vnd.github.v3+json"}
+    if GITHUB_TOKEN:
+        headers["Authorization"] = f"token {GITHUB_TOKEN}"
+        
+    gist_resp = requests.get(gist_url, headers=headers).json()
+    
+    if "files" not in gist_resp or "nikke_main_db.json" not in gist_resp["files"]:
+        print(f"🚨 Gist 데이터를 불러올 수 없습니다. 응답: {gist_resp}")
         return
         
-    main_db = json.loads(gist_resp["files"]["nikke_main_db.json"]["content"])
+    # 💡 [핵심 픽스 2] 불안정한 content 필드 대신, 직통 주소(raw_url)로 직접 다운로드합니다.
+    raw_url = gist_resp["files"]["nikke_main_db.json"]["raw_url"]
+    try:
+        main_db_resp = requests.get(raw_url)
+        main_db = main_db_resp.json()
+    except json.JSONDecodeError:
+        print("\n🚨 [치명적 오류] Gist에 저장된 nikke_main_db.json 파일이 텅 비어있거나 망가졌습니다!")
+        print("➡️ 깃허브 Gist 페이지에 접속하셔서, 기존의 원본 JSON 데이터를 복사해서 다시 채워넣고 저장하신 뒤에 다시 실행해 주세요.\n")
+        return
     
     print("🛠️ 3. 데이터 파싱 및 AB0C 스탯 공식 적용 시작...")
     new_cnt, upd_cnt = 0, 0
     
-    # 공식 데이터가 리스트([])인지 딕셔너리({})인지 유연하게 처리
     items = official_data if isinstance(official_data, list) else official_data.values()
     
     for item in items:
@@ -53,19 +66,16 @@ def main():
         rare = item.get("original_rare", "SSR")
         char_class = item.get("class", "Attacker")
         
-        # 무기 타입 추출 (구조 안쪽 깊숙이 있으므로 try-except로 안전하게 파싱)
         weapon = "AR"
         try:
             weapon = item["shot_id"]["element"]["weapon_type"]
         except KeyError:
             pass
             
-        # 이름 추출 ({"name": "프리카"} 형태 처리)
         name_local = item.get("name_localkey", f"알수없는니케({code})")
         if isinstance(name_local, dict):
             name_local = name_local.get("name", f"알수없는니케({code})")
             
-        # 💡 동적 스탯 ID 생성! (예: 프리카 -> SSR(5), Supporter(3), SR(6) -> 5306)
         stat_id = get_stat_enhance_id(rare, char_class, weapon)
         
         if code not in main_db:
@@ -74,7 +84,6 @@ def main():
         else:
             upd_cnt += 1
             
-        # 기존 Gist DB에 오른쪽 포맷으로 데이터 완벽 덮어쓰기
         main_db[code].update({
             "id": item.get("id"),
             "name_code": int(code),
@@ -84,7 +93,6 @@ def main():
             "stat_enhance_id": stat_id
         })
         
-        # element_id 데이터 등 추가 병합
         if "element_id" in item and "element" in item["element_id"]:
             main_db[code]["element_details"] = [item["element_id"]["element"]]
             
@@ -95,10 +103,6 @@ def main():
         return
         
     print("🚀 4. Gist에 최종 업데이트된 DB 업로드 중...")
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
     payload = {
         "files": {
             "nikke_main_db.json": {
