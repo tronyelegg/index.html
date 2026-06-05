@@ -2,11 +2,12 @@ import os
 import json
 import requests
 
-# 💡 Gist 설정
+# 💡 1. 공식 블라블라 DB 및 내 Gist 설정
+OFFICIAL_DB_URL = "https://sg-tools-cdn.blablalink.com/wi-97/ni-77/ffc69c4074f27bc772acbe869127e616.json"
 GIST_ID = "aa065a2c885931e6676cbc7d5a00f51c"
 GITHUB_TOKEN = os.getenv("GIST_TOKEN")
 
-# 💡 AB0C 생성용 맵핑 사전
+# 💡 2. 유저님의 천재적인 AB0C 스탯 ID 조합 공식 맵핑
 RARE_MAP = {"R": 1, "SR": 3, "SSR": 5}
 CLASS_MAP = {"Attacker": 1, "Defender": 2, "Supporter": 3}
 WEAPON_MAP = {"SG": 1, "SMG": 2, "AR": 3, "MG": 4, "RL": 5, "SR": 6}
@@ -19,30 +20,32 @@ def get_stat_enhance_id(rare, char_class, weapon):
     return int(f"{a}{b}0{c}")
 
 def main():
-    print("🔄 1. Gist에서 기존 메인 DB 다운로드 중...")
+    print("🔄 1. 블라블라 공식 DB(시프티패드) 다운로드 중...")
+    try:
+        official_resp = requests.get(OFFICIAL_DB_URL)
+        official_resp.raise_for_status()
+        official_data = official_resp.json()
+    except Exception as e:
+        print(f"🚨 공식 DB를 불러오는 데 실패했습니다: {e}")
+        return
+
+    print("🔄 2. Gist에서 내 기존 메인 DB 다운로드 중...")
     gist_url = f"https://api.github.com/gists/{GIST_ID}"
     gist_resp = requests.get(gist_url).json()
     
     if "files" not in gist_resp:
-        print("🚨 Gist 데이터를 불러올 수 없습니다.")
+        print("🚨 Gist 데이터를 불러올 수 없습니다. GIST_TOKEN이나 GIST_ID를 확인해주세요.")
         return
         
     main_db = json.loads(gist_resp["files"]["nikke_main_db.json"]["content"])
     
-    print("🔄 2. 원본 데이터(raw_data.json) 로드 중...")
-    # ⚠️ 유저님이 깃허브에 올릴 왼쪽 포맷의 원본 JSON 파일 이름입니다.
-    if not os.path.exists("raw_data.json"):
-        print("🚨 원본 데이터 파일(raw_data.json)을 찾을 수 없습니다! 스크립트를 종료합니다.")
-        return
-        
-    with open("raw_data.json", "r", encoding="utf-8") as f:
-        raw_data = json.load(f)
-        
-    print("🛠️ 3. AB0C 공식 적용 및 데이터 병합 시작...")
-    new_cnt = 0
-    upd_cnt = 0
+    print("🛠️ 3. 데이터 파싱 및 AB0C 스탯 공식 적용 시작...")
+    new_cnt, upd_cnt = 0, 0
     
-    for item in raw_data:
+    # 공식 데이터가 리스트([])인지 딕셔너리({})인지 유연하게 처리
+    items = official_data if isinstance(official_data, list) else official_data.values()
+    
+    for item in items:
         if "name_code" not in item:
             continue
             
@@ -57,21 +60,21 @@ def main():
         except KeyError:
             pass
             
-        # 💡 유저님의 아이디어: stat_enhance_id 동적 생성
-        stat_id = get_stat_enhance_id(rare, char_class, weapon)
-        
-        # 이름 추출 (왼쪽 포맷은 딕셔너리로 되어 있으므로 처리)
+        # 이름 추출 ({"name": "프리카"} 형태 처리)
         name_local = item.get("name_localkey", f"알수없는니케({code})")
         if isinstance(name_local, dict):
             name_local = name_local.get("name", f"알수없는니케({code})")
             
+        # 💡 동적 스탯 ID 생성! (예: 프리카 -> SSR(5), Supporter(3), SR(6) -> 5306)
+        stat_id = get_stat_enhance_id(rare, char_class, weapon)
+        
         if code not in main_db:
             main_db[code] = {}
             new_cnt += 1
         else:
             upd_cnt += 1
             
-        # 기존 Gist DB에 오른쪽 포맷으로 데이터 덮어쓰기
+        # 기존 Gist DB에 오른쪽 포맷으로 데이터 완벽 덮어쓰기
         main_db[code].update({
             "id": item.get("id"),
             "name_code": int(code),
@@ -85,13 +88,13 @@ def main():
         if "element_id" in item and "element" in item["element_id"]:
             main_db[code]["element_details"] = [item["element_id"]["element"]]
             
-    print(f"✅ 파싱 완료: 신규 추가 {new_cnt}개, 업데이트 {upd_cnt}개")
+    print(f"✅ 파싱 완료: 신규 발견 {new_cnt}개, 기존 데이터 갱신 {upd_cnt}개")
     
     if not GITHUB_TOKEN:
-        print("⚠️ GIST_TOKEN이 설정되지 않아 Gist 업데이트를 건너뜁니다.")
+        print("⚠️ GIST_TOKEN이 설정되지 않아 Gist 업로드를 건너뜁니다.")
         return
         
-    print("🚀 4. Gist에 최종 DB 업로드 중...")
+    print("🚀 4. Gist에 최종 업데이트된 DB 업로드 중...")
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
@@ -106,7 +109,7 @@ def main():
     
     patch_resp = requests.patch(gist_url, headers=headers, json=payload)
     if patch_resp.status_code == 200:
-        print("🎉 Gist 메인 DB 성공적으로 업데이트 되었습니다!")
+        print("🎉 Gist 메인 DB가 성공적으로 무인 자동 업데이트 되었습니다!")
     else:
         print(f"🚨 업로드 에러: {patch_resp.text}")
 
