@@ -7,16 +7,17 @@ OFFICIAL_DB_URL = "https://sg-tools-cdn.blablalink.com/wi-97/ni-77/ffc69c4074f27
 GIST_ID = "aa065a2c885931e6676cbc7d5a00f51c"
 GITHUB_TOKEN = os.getenv("GIST_TOKEN")
 
-# 💡 2. 유저님의 천재적인 AB0C 스탯 ID 조합 공식 맵핑
+# 💡 2. 유저님이 찾아내신 완벽한 AB0C 스탯 ID 조합 공식 맵핑
 RARE_MAP = {"R": 1, "SR": 3, "SSR": 5}
 CLASS_MAP = {"Attacker": 1, "Defender": 2, "Supporter": 3}
-WEAPON_MAP = {"SG": 1, "SMG": 2, "AR": 3, "MG": 4, "RL": 5, "SR": 6}
+# 분석 결과 반영: AR=1, SR=2, SMG=3, SG=4, RL=5, MG=6
+WEAPON_MAP = {"AR": 1, "SR": 2, "SMG": 3, "SG": 4, "RL": 5, "MG": 6}
 
 def get_stat_enhance_id(rare, char_class, weapon):
     """A(등급) + B(클래스) + 0 + C(무기) 조합 공식"""
     a = RARE_MAP.get(rare, 5)        
     b = CLASS_MAP.get(char_class, 1) 
-    c = WEAPON_MAP.get(weapon, 3)    
+    c = WEAPON_MAP.get(weapon, 1)    # 기본값 AR(1)로 변경
     return int(f"{a}{b}0{c}")
 
 def main():
@@ -76,7 +77,14 @@ def main():
         if isinstance(name_local, dict):
             name_local = name_local.get("name", f"알수없는니케({code})")
             
-        stat_id = get_stat_enhance_id(rare, char_class, weapon)
+        # 💡 [전투력 0 오류 방지]: 1순위로 공식 DB의 진짜 스탯 ID를 무조건 가져옵니다!
+        stat_id = item.get("stat_enhance_id")
+        if not stat_id and "stat_enhance_detail" in item:
+            stat_id = item["stat_enhance_detail"].get("id")
+            
+        # 공식 DB에도 ID가 없는 경우에만 완벽해진 AB0C 공식을 사용합니다.
+        if not stat_id:
+            stat_id = get_stat_enhance_id(rare, char_class, weapon)
         
         if code not in main_db:
             main_db[code] = {}
