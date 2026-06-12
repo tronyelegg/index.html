@@ -6,17 +6,23 @@
             const overlay = document.createElement('div');
             overlay.id = 'nikke-dashboard-modal-overlay';
             Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: '2147483647', display: 'flex', justifyContent: 'center', alignItems: 'center' });
+            
             const modal = document.createElement('div');
             Object.assign(modal.style, { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', width: '90%', maxWidth: '340px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'sans-serif', color: '#333', textAlign: 'center' });
+            
             const title = document.createElement('div');
-            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor v16.6</span><br><span style="font-size:11px;color:#666;">Optimized Cloud Engine</span>';
+            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor v16.7</span><br><span style="font-size:11px;color:#666;">Optimized Cloud Engine</span>';
             title.style.borderBottom = '1px solid #eee'; title.style.paddingBottom = '10px';
-            const status = document.createElement('p');
+            
+            // 💡 [수정됨] 브라우저 오류 방지를 위해 <p> 대신 <div> 사용
+            const status = document.createElement('div');
             status.id = 'nikke-status-text'; status.innerText = '서버 통신 중...';
             status.style.fontSize = '14px'; status.style.margin = '20px 0'; status.style.fontWeight = 'bold';
+            
             const closeBtn = document.createElement('button');
+            closeBtn.id = 'nikke-close-btn'; // 💡 [수정됨] 닫기 버튼 절대 잃어버리지 않게 ID 부여
             closeBtn.innerText = '닫기';
-            Object.assign(closeBtn.style, { padding: '6px 15px', backgroundColor: '#999', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', display: 'none' });
+            Object.assign(closeBtn.style, { padding: '8px 20px', backgroundColor: '#999', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', display: 'none', margin: '10px auto 0 auto' });
             closeBtn.onclick = () => overlay.remove();
             
             modal.appendChild(title); modal.appendChild(status); modal.appendChild(closeBtn);
@@ -30,7 +36,6 @@
             const el = document.getElementById('nikke-status-text');
             if (!el) return;
             
-            // 💡 [UI 패치] 3개의 큰 버튼으로 깔끔하게 정리 (JSON 클릭 시 사이트 이동 추가)
             el.innerHTML = `
                 <span style="color:#009688; font-size:15px; font-weight:bold;">✅ 데이터 추출 완벽 성공!</span><br>
                 <span style="font-size:12px; color:#666; display:block; margin:10px 0 15px 0;">원하시는 작업을 선택해주세요.</span>
@@ -59,7 +64,6 @@
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                 a.download = `NIKKE_Data_${nickname}.json`; a.click();
                 URL.revokeObjectURL(a.href);
-                // 💡 [기능 패치] JSON 다운로드 직후 사이트를 열어주어 유저 편의성 극대화
                 setTimeout(() => window.open("https://tronyelegg.github.io/index.html", "_blank"), 500);
             };
 
@@ -70,8 +74,9 @@
                 URL.revokeObjectURL(a.href);
             };
 
-            const closeBtn = el.parentNode.querySelector('button:last-child');
-            if (closeBtn && closeBtn.innerText === '닫기') closeBtn.style.display = 'block';
+            // 💡 [수정됨] 이름표를 불러와서 무조건 강제로 보여주게 만듦
+            const closeBtn = document.getElementById('nikke-close-btn');
+            if (closeBtn) closeBtn.style.display = 'block';
         }
     };
     
@@ -211,7 +216,6 @@
                             const cId = char.name_code || chunk[0]; 
                             const mInfo = mainDB[cId] || {};
                             
-                            // 💡 [코드 다이어트] 하드코딩 맵 삭제! DB에서 이름 바로 가져옴
                             let rawName = mInfo.name_localkey || `알수없는니케(${cId})`;
                             if (rawName === "라피 : 레드후드") rawName = "라피 : 레드 후드";
                             if (rawName === "레드후드") rawName = "레드 후드";
