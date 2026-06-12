@@ -1,14 +1,15 @@
 (async function() {
     if(document.getElementById('nikke-dashboard-modal-overlay')) return;
+    
     const ui = {
         create: function() {
             const overlay = document.createElement('div');
             overlay.id = 'nikke-dashboard-modal-overlay';
             Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: '2147483647', display: 'flex', justifyContent: 'center', alignItems: 'center' });
             const modal = document.createElement('div');
-            Object.assign(modal.style, { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', width: '90%', maxWidth: '320px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'sans-serif', color: '#333', textAlign: 'center' });
+            Object.assign(modal.style, { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', width: '90%', maxWidth: '340px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'sans-serif', color: '#333', textAlign: 'center' });
             const title = document.createElement('div');
-            title.innerHTML = '<span style="font-size:15px;font-weight:bold;">NIKKE Spec Extractor v16.4</span><br><span style="font-size:11px;color:#666;">GitHub Cloud Engine</span>';
+            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor v16.6</span><br><span style="font-size:11px;color:#666;">Optimized Cloud Engine</span>';
             title.style.borderBottom = '1px solid #eee'; title.style.paddingBottom = '10px';
             const status = document.createElement('p');
             status.id = 'nikke-status-text'; status.innerText = '서버 통신 중...';
@@ -17,6 +18,7 @@
             closeBtn.innerText = '닫기';
             Object.assign(closeBtn.style, { padding: '6px 15px', backgroundColor: '#999', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', display: 'none' });
             closeBtn.onclick = () => overlay.remove();
+            
             modal.appendChild(title); modal.appendChild(status); modal.appendChild(closeBtn);
             overlay.appendChild(modal); document.body.appendChild(overlay);
         },
@@ -24,36 +26,64 @@
             const el = document.getElementById('nikke-status-text');
             if (el) el.innerText = text;
         },
-        finish: function(payload, nickname) {
+        finish: function(payload, excelBuffer, nickname) {
             const el = document.getElementById('nikke-status-text');
             if (!el) return;
-            el.innerHTML = '<span style="color:#009688;">🟢 데이터 추출 완료!</span><br><br><span style="font-size:12px;color:#555;">원하시는 작업을 선택해주세요.</span>';
-            const link = document.createElement('button');
-            link.innerText = '🚀 빌더 사이트로 자동 전송';
-            Object.assign(link.style, { width: '100%', padding: '12px', backgroundColor: '#3F51B5', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '10px' });
-            link.onclick = () => {
+            
+            // 💡 [UI 패치] 3개의 큰 버튼으로 깔끔하게 정리 (JSON 클릭 시 사이트 이동 추가)
+            el.innerHTML = `
+                <span style="color:#009688; font-size:15px; font-weight:bold;">✅ 데이터 추출 완벽 성공!</span><br>
+                <span style="font-size:12px; color:#666; display:block; margin:10px 0 15px 0;">원하시는 작업을 선택해주세요.</span>
+                
+                <button id="btn-web" style="width:100%; padding:14px; margin-bottom:10px; background-color:#3F51B5; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                    🚀 1. 스펙 빌더로 자동 전송
+                </button>
+                
+                <button id="btn-json" style="width:100%; padding:14px; margin-bottom:10px; background-color:#009688; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                    🔒 2. JSON 저장 후 사이트로 이동
+                </button>
+
+                <button id="btn-excel" style="width:100%; padding:14px; margin-bottom:5px; background-color:#2E7D32; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
+                    📊 3. 엑셀(EXCEL) 파일로 저장
+                </button>
+            `;
+            
+            document.getElementById('btn-web').onclick = () => {
                 const newWin = window.open("https://tronyelegg.github.io/index.html", "_blank");
                 if (newWin) { setTimeout(() => { newWin.postMessage({ type: 'NIKKE_SPEC_DATA', payload: payload }, "*"); }, 2500); } 
                 else { alert("팝업 차단이 감지되었습니다."); }
             };
-            const jsonBtn = document.createElement('button');
-            jsonBtn.innerText = '🔒 JSON 파일로 저장';
-            Object.assign(jsonBtn.style, { width: '100%', padding: '12px', backgroundColor: '#009688', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' });
-            jsonBtn.onclick = () => {
+            
+            document.getElementById('btn-json').onclick = () => {
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                 a.download = `NIKKE_Data_${nickname}.json`; a.click();
+                URL.revokeObjectURL(a.href);
+                // 💡 [기능 패치] JSON 다운로드 직후 사이트를 열어주어 유저 편의성 극대화
+                setTimeout(() => window.open("https://tronyelegg.github.io/index.html", "_blank"), 500);
             };
-            el.parentNode.insertBefore(link, el.nextSibling);
-            link.parentNode.insertBefore(jsonBtn, link.nextSibling);
-            const btn = el.parentNode.querySelector('button:last-child');
-            if (btn) btn.style.display = 'block';
+
+            document.getElementById('btn-excel').onclick = () => {
+                const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                a.download = `NIKKE_CP_Dashboard_${nickname}.xlsx`; a.click();
+                URL.revokeObjectURL(a.href);
+            };
+
+            const closeBtn = el.parentNode.querySelector('button:last-child');
+            if (closeBtn && closeBtn.innerText === '닫기') closeBtn.style.display = 'block';
         }
     };
+    
     ui.create();
 
-    try {
-        ui.update("OpenID 탐색 중...");
+    function loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const s = document.createElement('script'); s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s);
+        });
+    }
+
+    async function huntOpenIdAutomated() {
         const extract15 = (str) => { if (!str) return null; const m = String(str).match(/(\d{15,})/); return m ? m[1] : null; };
         const urlParams = new URLSearchParams(window.location.search);
         let uidRaw = urlParams.get('uid') || urlParams.get('id') || urlParams.get('target_openid');
@@ -78,9 +108,15 @@
             const cookieMatch = document.cookie.match(/game_openid=(?:\d+-)?(\d{15,})/);
             if (cookieMatch) targetId = cookieMatch[1];
         }
-        if (!targetId) { ui.update("🚨 OpenID를 찾을 수 없습니다."); return; }
+        return targetId;
+    }
 
-        ui.update("서버 스캔 중...");
+    async function runMainLogic() {
+        ui.update("OpenID를 자동으로 찾는 중...");
+        let targetId = await huntOpenIdAutomated();
+        if (!targetId) { ui.update("🚨 비공개 계정이거나 OpenID를 찾을 수 없습니다."); return; }
+        
+        ui.update("서버 정보를 스캔 중입니다...");
         let areaId = null;
         for (const ta of [81, 82, 83, 84, 85, 86]) {
             try {
@@ -89,10 +125,10 @@
                 if (data.code === 0) { areaId = ta; break; }
             } catch (e) {}
         }
-        if (!areaId) { ui.update("🚨 서버 정보를 찾지 못했습니다."); return; }
+        if (!areaId) { ui.update("🚨 서버 정보를 찾지 못했습니다.\n계정 설정을 확인해주세요."); return; }
         const regionCodeMap = { 81: "JP", 82: "NA", 83: "KR", 84: "Global", 85: "SEA", 86: "TW" };
 
-        ui.update("데이터베이스 동기화 중...");
+        ui.update("게임 데이터베이스 동기화 중...");
         const ts = Date.now();
         const [resChars, resMainDB, resGrowthDB, resAff, resEquip, resCube, resColR, resColSR, resOutpost, resBasic] = await Promise.all([
             fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: areaId }), credentials: "include" }),
@@ -131,9 +167,7 @@
 
         const equipMap = {};
         (equipData.records || Object.values(equipData)).forEach(eq => {
-            if (eq && eq.id) {
-                equipMap[eq.id] = { hp: eq.stat.find(s => s.stat_type === 'Hp')?.stat_value || 0, atk: eq.stat.find(s => s.stat_type === 'Atk')?.stat_value || 0, def: eq.stat.find(s => s.stat_type.startsWith('Def') || s.stat_type === 'Defence')?.stat_value || 0 };
-            }
+            if (eq && eq.id) { equipMap[eq.id] = { hp: eq.stat.find(s => s.stat_type === 'Hp')?.stat_value || 0, atk: eq.stat.find(s => s.stat_type === 'Atk')?.stat_value || 0, def: eq.stat.find(s => s.stat_type.startsWith('Def') || s.stat_type === 'Defence')?.stat_value || 0 }; }
         });
 
         const affectionMap = {};
@@ -141,19 +175,28 @@
         const targetAffArr = (affArr[1] && Array.isArray(affArr[1])) ? affArr[1] : affArr;
         targetAffArr.forEach(a => { if (a) affectionMap[a.attractive_level] = a; });
 
-        const charMap = { 5170: "네온 : 비전 아이", 5169: "아니스 : 스타", 5168: "백학", 5167: "아르카나 : 포츈 메이트", 5166: "E.H.", 5165: "타키나", 5164: "치사토", 5163: "벨벳", 5162: "레이블", 5161: "스노우 화이트 : 헤비암즈", 5160: "브리드 : 사일런트 트랙", 5159: "디젤 : 윈터 스위츠", 5158: "솔린 : 프로스트 티켓", 5129: "라피 : 레드 후드", 5101: "레드 후드" };
-        Object.values(mainDB).forEach(c => {
-            if (c.name_code && c.name_localkey && !charMap[c.name_code]) {
-                let n = c.name_localkey; if (n === "라피 : 레드후드") n = "라피 : 레드 후드"; if (n === "레드후드") n = "레드 후드";
-                charMap[c.name_code] = n;
-            }
-        });
-
         const commonV = { "01": "4.77%", "02": "5.47%", "03": "6.18%", "04": "6.88%", "05": "7.59%", "06": "8.29%", "07": "9.00%", "08": "9.70%", "09": "10.40%", "10": "11.11%", "11": "11.81%", "12": "12.52%", "13": "13.22%", "14": "13.93%", "15": "14.63%" };
         const optValMap = { "13": commonV, "12": commonV, "11": { "01": "2.30%", "02": "2.64%", "03": "2.98%", "04": "3.32%", "05": "3.66%", "06": "4.00%", "07": "4.35%", "08": "4.69%", "09": "5.03%", "10": "5.37%", "11": "5.70%", "12": "6.05%", "13": "6.39%", "14": "6.73%", "15": "7.07%" }, "10": { "01": "1.98%", "02": "2.28%", "03": "2.57%", "04": "2.86%", "05": "3.16%", "06": "3.45%", "07": "3.75%", "08": "4.04%", "09": "4.33%", "10": "4.63%", "11": "4.92%", "12": "5.21%", "13": "5.51%", "14": "5.80%", "15": "6.09%" }, "09": commonV, "08": commonV, "07": { "01": "27.84%", "02": "31.95%", "03": "36.06%", "04": "40.17%", "05": "44.28%", "06": "48.39%", "07": "52.50%", "08": "56.60%", "09": "60.71%", "10": "64.82%", "11": "68.93%", "12": "73.04%", "13": "77.15%", "14": "81.26%", "15": "85.37%" }, "06": commonV, "05": { "01": "9.54%", "02": "10.94%", "03": "12.34%", "04": "13.75%", "05": "15.15%", "06": "16.55%", "07": "17.95%", "08": "19.35%", "09": "20.75%", "10": "22.15%", "11": "23.56%", "12": "24.96%", "13": "26.36%", "14": "27.76%", "15": "29.16%" } };
         const shortOpt = { "05": "우코", "06": "명중", "07": "장탄", "08": "공증", "09": "차댐", "10": "차속", "11": "크확", "12": "크뎀", "13": "방증" };
 
-        ui.update("전투력 연산 중...");
+        ui.update("엑셀 파일 양식을 생성 중입니다...");
+        const workbook = new ExcelJS.Workbook();
+        const wsCalc = workbook.addWorksheet("🔮 실시간 스펙 검색기");
+        const wsMyData = workbook.addWorksheet("✨ 내 니케 데이터", { views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }] });
+        wsMyData.addRow(['캐릭터 이름', '레벨', '돌파/코강', '소장품/애장품', '스킬 레벨', '장비 레벨', '오버옵션 합산', '호감도', '⚔️ Lv.40 전투력', '⚔️ 현재 싱크로 전투력', '⚔️ Lv.400 전투력']);
+        wsMyData.autoFilter = 'A1:K1';
+        wsCalc.columns = [{ header: '니케 선택 🔍 (클릭)', width: 25 }, { header: '레벨', width: 10 }, { header: '돌파 현황', width: 15 }, { header: '소장품/애장품', width: 20 }, { header: '스킬 레벨', width: 15 }, { header: '장비 레벨', width: 15 }, { header: '오버옵션 합산', width: 35 }, { header: '호감도', width: 10 }, { header: 'Lv.40 전투력', width: 15 }, { header: '싱크로 전투력', width: 15 }, { header: 'Lv.400 전투력', width: 15 }];
+        
+        wsCalc.getRow(1).eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE91E63' } }; c.font = { color: { argb: 'FFFFFFFF' }, bold: true }; c.alignment = { horizontal: 'center' }; });
+        for (let rowNum = 2; rowNum <= 15; rowNum++) {
+            const r = wsCalc.addRow(['(니케 이름을 선택하세요)', '', '', '', '', '', '', '', '', '', '']);
+            r.getCell(1).dataValidation = { type: 'list', allowBlank: true, formulae: ["'✨ 내 니케 데이터'!$A$2:$A$300"] };
+            for (let cNum = 2; cNum <= 11; cNum++) r.getCell(cNum).value = { formula: `=IFERROR(VLOOKUP(A${rowNum}, '✨ 내 니케 데이터'!A:K, ${cNum}, FALSE), "-")` };
+            r.eachCell(c => c.alignment = { horizontal: 'center', vertical: 'middle' });
+        }
+        wsMyData.getRow(1).eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3F51B5' } }; c.font = { color: { argb: 'FFFFFFFF' }, bold: true }; c.alignment = { horizontal: 'center' }; });
+
+        ui.update("개별 전투력을 정밀 연산 중입니다...");
         const synLevel = outpostData?.synchro_level || 1;
         let extracted = [];
         
@@ -165,12 +208,22 @@
                 if (det.code === 0 && det.data?.character_details) {
                     det.data.character_details.forEach(char => {
                         try {
-                            const cId = char.name_code || chunk[0]; const cName = charMap[cId] || `알수없는니케(${cId})`; const mInfo = mainDB[cId] || {};
+                            const cId = char.name_code || chunk[0]; 
+                            const mInfo = mainDB[cId] || {};
+                            
+                            // 💡 [코드 다이어트] 하드코딩 맵 삭제! DB에서 이름 바로 가져옴
+                            let rawName = mInfo.name_localkey || `알수없는니케(${cId})`;
+                            if (rawName === "라피 : 레드후드") rawName = "라피 : 레드 후드";
+                            if (rawName === "레드후드") rawName = "레드 후드";
+                            const cName = rawName;
+
                             const cls = (mInfo.class || "Attacker").toUpperCase(); const corp = (mInfo.corporation || "ELYSION").toUpperCase();
                             const sId = mInfo.stat_enhance_id || 0; const grw = growthDB[sId] || null;
                             const gr = char.grade || 0; const co = char.core || 0;
                             let brkStr = (co > 0) ? ((co === 7) ? "풀코" : `${co}코강`) : ((gr === 3) ? "풀돌" : (gr === 0 ? "명함" : `${gr}돌`));
-                            const rLv = charLevelMap[cId] || 1; const skStr = `${char.skill1_lv || 1}/${char.skill2_lv || 1}/${char.ulti_skill_lv || 1}`;
+                            const rLv = charLevelMap[cId] || 1; 
+                            let lvStatusStr = (rLv === synLevel) ? "싱크로" : String(rLv);
+                            const skStr = `${char.skill1_lv || 1}/${char.skill2_lv || 1}/${char.ulti_skill_lv || 1}`;
                             const eqStr = `${char.head_equip_lv || 0}/${char.arm_equip_lv || 0}/${char.torso_equip_lv || 0}/${char.leg_equip_lv || 0}`;
                             const aLv = char.attractive_lv || char.attractive_level || char.attractive_stat_lv || char.likability_lv || 1;
                             
@@ -201,8 +254,8 @@
                                 if (cLv <= 4) cuCo = l1 + 1; else cuCo = l1 + l2 + 4;
                             }
                             
-                            let colHp = 0, colAtk = 0, colDef = 0, colCo = 0; const fTid = char.favorite_item_tid || 0; const fLv = char.favorite_item_lv || 0; let fGr = "None";
-                            if (fTid) { if (String(fTid).startsWith("2")) fGr = "Favorite"; else if (String(fTid).startsWith("100")) fGr = String(fTid).charAt(5) === "1" ? "R" : "SR"; }
+                            let colHp = 0, colAtk = 0, colDef = 0, colCo = 0; const fTid = char.favorite_item_tid || 0; const fLv = char.favorite_item_lv || 0; let fGr = "None"; let favStr = "-";
+                            if (fTid) { if (String(fTid).startsWith("2")) { fGr = "Favorite"; favStr = `애장품 ${fLv}단계`; } else if (String(fTid).startsWith("100")) { fGr = String(fTid).charAt(5) === "1" ? "R" : "SR"; favStr = `${fGr}등급 ${fLv}레벨`; } }
                             if (fLv > 0) {
                                 let cItm = fGr === "R" ? colRData : (fGr === "SR" || fGr === "Favorite" ? colSRData : null);
                                 if (cItm?.hp) {
@@ -249,6 +302,7 @@
                                 return Math.round((Math.round(bHp * 0.7) + Math.round(bAtk * 19.35) + Math.round(bDef * 70)) * (m1 + m2) / 100);
                             }
                             
+                            wsMyData.addRow([cName, lvStatusStr, brkStr, favStr, skStr, eqStr, ovrDisp, aLv, getCp(40), getCp(synLevel), getCp(400)]);
                             extracted.push({ code: cId, name: cName, break: brkStr, skill: skStr, equip: eqStr, overload: ovrDisp, cp: getCp(rLv) });
                         } catch (e) {}
                     });
@@ -256,9 +310,29 @@
             } catch (e) {}
         }
         
+        [wsMyData, wsCalc].forEach(ws => {
+            ws.eachRow({ includeEmpty: true }, row => {
+                row.eachCell({ includeEmpty: true }, (cell, cNum) => {
+                    if (cell.value && cell.value.formula) return;
+                    const valStr = String(cell.value || ""); let vLen = 0;
+                    for (let i = 0; i < valStr.length; i++) vLen += valStr.charCodeAt(i) > 127 ? 1.8 : 1.1;
+                    const col = ws.getColumn(cNum); col.width = Math.min(Math.max(col.width || 12, vLen + 3), 40);
+                });
+            });
+        });
+        const excelBuffer = await workbook.xlsx.writeBuffer();
+
         extracted.sort((a, b) => b.cp - a.cp);
-        ui.finish({ playerName: finalNickname, server: regionCodeMap[areaId] || String(areaId), synchroLevel: synLevel, characters: extracted }, finalNickname);
-    } catch (e) {
-        ui.update("🚨 오류 발생: " + e.message);
+        ui.finish({ playerName: finalNickname, server: regionCodeMap[areaId] || String(areaId), synchroLevel: synLevel, characters: extracted }, excelBuffer, finalNickname);
     }
+
+    async function startProcess() {
+        try {
+            await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js');
+            runMainLogic();
+        } catch (e) {
+            ui.update("🚨 오류: 엑셀 라이브러리를 불러오지 못했습니다.");
+        }
+    }
+    startProcess();
 })();
