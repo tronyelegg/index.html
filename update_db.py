@@ -5,7 +5,7 @@ import requests
 OFFICIAL_DB_URL = "https://sg-tools-cdn.blablalink.com/wi-97/ni-77/ffc69c4074f27bc772acbe869127e616.json"
 GIST_ID = "aa065a2c885931e6676cbc7d5a00f51c"
 GITHUB_TOKEN = os.getenv("GIST_TOKEN")
-IMAGE_DIR = "images" # 💡 이미지를 저장할 로컬 폴더 이름
+IMAGE_DIR = "images"
 
 RARE_MAP = {"R": 1, "SR": 3, "SSR": 5}
 CLASS_MAP = {"Attacker": 1, "Defender": 2, "Supporter": 3}
@@ -18,7 +18,6 @@ def get_stat_enhance_id(rare, char_class, weapon):
     return int(f"{a}{b}0{c}")
 
 def main():
-    # 이미지 저장 폴더가 없으면 생성
     if not os.path.exists(IMAGE_DIR):
         os.makedirs(IMAGE_DIR)
 
@@ -48,18 +47,21 @@ def main():
         print("🚨 Gist DB 파싱 오류")
         return
     
-    print("🛠️ 3. 데이터 파싱 및 봇(Bot) 이미지 다운로드 시작...")
-    new_cnt, upd_cnt = 0, 0
     items = official_data if isinstance(official_data, list) else official_data.values()
+    total_items = len(items)
+    print(f"🛠️ 3. 총 {total_items}개의 캐릭터 데이터 파싱 및 이미지 다운로드 시작... (첫 실행 시 3~5분 소요됩니다)")
     
-    for item in items:
+    new_cnt, upd_cnt = 0, 0
+    
+    # 💡 진행률을 보기 위해 enumerate 추가
+    for idx, item in enumerate(items):
         if "name_code" not in item:
             continue
             
         code = str(item["name_code"])
         rare = item.get("original_rare", "SSR")
         char_class = item.get("class", "Attacker")
-        res_id = item.get("resource_id") # 💡 리소스 ID 추출
+        res_id = item.get("resource_id")
         
         weapon = "AR"
         try:
@@ -90,28 +92,27 @@ def main():
             "original_rare": rare,
             "class": char_class,
             "stat_enhance_id": stat_id,
-            "resource_id": res_id # 💡 DB에 리소스 ID 저장 완료!
+            "resource_id": res_id
         })
         
         if "element_id" in item and "element" in item["element_id"]:
             main_db[code]["element_details"] = [item["element_id"]["element"]]
 
-        # 📸 💡 봇(Bot) 이미지 다운로드 로직
+        # 📸 봇 이미지 다운로드 로직 (진행률 출력 추가)
         if res_id:
             img_path = os.path.join(IMAGE_DIR, f"{code}.png")
-            # 내 폴더에 이미지가 없다면 공식 서버에서 즉시 다운로드하여 저장
             if not os.path.exists(img_path):
+                print(f"[{idx+1}/{total_items}] ⬇️ 다운로드 중: {name_local} ({code}.png)")
                 img_url = f"https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/{res_id}.png"
                 try:
                     img_resp = requests.get(img_url)
                     if img_resp.status_code == 200:
                         with open(img_path, "wb") as f:
                             f.write(img_resp.content)
-                        print(f"🖼️ 신규 이미지 아카이빙 완료: {code}.png")
                 except Exception:
-                    pass
+                    print(f"  ❌ 다운로드 실패: {name_local}")
             
-    print(f"✅ 작업 완료: 신규 발견 {new_cnt}개, 갱신 {upd_cnt}개")
+    print(f"\n✅ 작업 완료: 신규 발견 {new_cnt}개, 갱신 {upd_cnt}개")
     
     if not GITHUB_TOKEN:
         return
@@ -119,6 +120,7 @@ def main():
     print("🚀 4. Gist에 최종 업데이트된 DB 업로드 중...")
     payload = {"files": {"nikke_main_db.json": {"content": json.dumps(main_db, ensure_ascii=False, indent=2)}}}
     requests.patch(gist_url, headers=headers, json=payload)
+    print("🎉 Gist DB 업데이트 성공!")
 
 if __name__ == "__main__":
     main()
