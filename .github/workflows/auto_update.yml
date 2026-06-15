@@ -24,3 +24,12 @@ jobs:
         env:
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
         run: python update_db.py
+
+      # 💡 파이썬이 받아온 신규 이미지를 내 깃허브에 자동 커밋&푸시!
+      - name: Commit and Push new images
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add images/
+          git commit -m "🤖 [Auto] 신규 캐릭터 프로필 이미지 아카이빙" || echo "추가할 신규 이미지가 없습니다."
+          git push origin main
