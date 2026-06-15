@@ -307,7 +307,8 @@
                             }
                             
                             wsMyData.addRow([cName, lvStatusStr, brkStr, favStr, skStr, eqStr, ovrDisp, aLv, getCp(40), getCp(synLevel), getCp(400)]);
-                            extracted.push({ code: cId, name: cName, break: brkStr, skill: skStr, equip: eqStr, overload: ovrDisp, cp: getCp(rLv) });
+                            const resId = mInfo.resource_id || "";
+                            extracted.push({ code: cId, name: cName, break: brkStr, skill: skStr, equip: eqStr, overload: ovrDisp, cp: getCp(rLv), resource_id: resId });
                         } catch (e) {}
                     });
                 }
