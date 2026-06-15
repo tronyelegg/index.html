@@ -14,13 +14,12 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* 💡 [UI 패치] 버튼 컨테이너 (PC: 한 줄에 3개) */
         .top-controls { 
             width: 100%; max-width: 1000px;
             margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
         }
         .top-controls button { 
-            flex: 1 1 calc(33.333% - 10px); /* PC에서는 3등분 */
+            flex: 1 1 calc(33.333% - 10px);
             min-width: 120px; padding: 14px 10px; font-size: 15px; font-weight: bold; cursor: pointer; 
             border-radius: 8px; border: none; outline: none; transition: 0.2s; 
             box-shadow: 0 4px 6px rgba(0,0,0,0.3); color: white; text-align: center;
@@ -73,14 +72,12 @@
         .grid-cp { font-size: 12px; color: #FFD700; text-shadow: 1px 1px 2px #000; font-weight: bold; }
         .placeholder { width: 100%; text-align: center; color: #4f5b82; padding: 50px 0; grid-column: 1 / -1; }
 
-        /* 💡 [모바일 패치] 모바일에서는 초기화/저장 버튼이 위에, 업로드 버튼이 아래에 100% 폭으로 깔림 */
         @media (max-width: 600px) {
             body { padding: 10px; }
-            .top-controls button { flex: 1 1 45%; } /* 상단 두 버튼 반반 */
+            .top-controls button { flex: 1 1 45%; } 
             #clearBtn { order: 1; }
             #downloadBtn { order: 2; }
-            #uploadBtn { order: 3; flex: 1 1 100%; } /* 아랫줄 넓게 */
-
+            #uploadBtn { order: 3; flex: 1 1 100%; } 
             .char-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .grid-item { height: 110px; }
             .grid-name { font-size: 11px; margin-bottom: 2px; }
@@ -158,10 +155,12 @@
                 if (char) {
                     partyCp += char.cp;
                     slot.className = 'slot filled';
+                    
+                    // 💡 [수정됨] 문법 오류를 일으키던 부분을 깔끔하게 분리했습니다.
+                    const imgUrl = char.resource_id ? `https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/${char.resource_id}.png` : `images/${char.code}.webp`;
+                    
                     slot.innerHTML = `
-                        const imgUrl = char.resource_id ? `https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/${char.resource_id}.png` : `images/${char.code}.webp`;
-                        slot.innerHTML = `
-                            <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
+                        <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
                         <div class="slot-content">
                             <div class="slot-badge">${char.break}</div>
                             <div class="slot-name">${char.name}</div>
@@ -192,10 +191,11 @@
                 const item = document.createElement('div');
                 item.className = `grid-item ${isSelected ? 'selected' : ''}`;
                 
+                // 💡 [수정됨] 여기도 동일하게 깔끔하게 분리했습니다.
+                const imgUrl = char.resource_id ? `https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/${char.resource_id}.png` : `images/${char.code}.webp`;
+                
                 item.innerHTML = `
-                    const imgUrl = char.resource_id ? `https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/${char.resource_id}.png` : `images/${char.code}.webp`;
-                    item.innerHTML = `
-                        <div class="grid-img" style="background-image: url('${imgUrl}');"></div>
+                    <div class="grid-img" style="background-image: url('${imgUrl}');"></div>
                     <div class="grid-content">
                         <div class="grid-name">${char.name}</div>
                         <div class="grid-cp">⚔️ ${char.cp.toLocaleString()}</div>
@@ -225,12 +225,10 @@
             renderSlots(); renderGrid();
         }
 
-        // 💡 1. 자동 연동 (postMessage) 리스너
         window.addEventListener('message', (event) => {
             if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { initData(event.data.payload); }
         });
 
-        // 💡 2. 수동 JSON 업로드 로직
         document.getElementById('uploadBtn').addEventListener('click', () => {
             document.getElementById('jsonUpload').click();
         });
@@ -253,7 +251,7 @@
                 }
             };
             reader.readAsText(file);
-            event.target.value = ''; // 동일한 파일 재업로드 허용
+            event.target.value = '';
         });
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
