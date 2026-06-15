@@ -124,7 +124,7 @@
     </div>
 
     <script>
-        let allCharacters = [];
+let allCharacters = [];
         let selectedCharacters = [];
 
         function adjustScale() {
@@ -156,8 +156,8 @@
                     partyCp += char.cp;
                     slot.className = 'slot filled';
                     
-                    // 💡 [수정됨] 문법 오류를 일으키던 부분을 깔끔하게 분리했습니다.
-                    const imgUrl = char.resource_id ? `https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/${char.resource_id}.png` : `images/${char.code}.webp`;
+                    // 💡 [수정완료] 무조건 내 깃허브의 images/ 폴더에서만 가져옵니다!
+                    const imgUrl = `images/${char.code}.webp`;
                     
                     slot.innerHTML = `
                         <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
@@ -191,8 +191,8 @@
                 const item = document.createElement('div');
                 item.className = `grid-item ${isSelected ? 'selected' : ''}`;
                 
-                // 💡 [수정됨] 여기도 동일하게 깔끔하게 분리했습니다.
-                const imgUrl = char.resource_id ? `https://sg-tools-cdn.blablalink.com/wi-97/ni-77/images/${char.resource_id}.png` : `images/${char.code}.webp`;
+                // 💡 [수정완료] 여기도 무조건 내 깃허브 폴더에서 가져오게 수정!
+                const imgUrl = `images/${char.code}.webp`;
                 
                 item.innerHTML = `
                     <div class="grid-img" style="background-image: url('${imgUrl}');"></div>
