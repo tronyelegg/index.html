@@ -16,7 +16,7 @@
 
         .top-controls { 
             width: 100%; max-width: 1000px;
-            margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
+            margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
         }
         .top-controls button { 
             flex: 1 1 calc(33.333% - 10px);
@@ -29,6 +29,18 @@
         #uploadBtn { background-color: #9C27B0; }
         #clearBtn { background-color: #E91E63; display: none; }
         #downloadBtn { background-color: #00E676; color: #000; display: none; }
+
+        /* 💡 [UI 신설] 디스플레이 커스텀 컨트롤러 옵션 바 */
+        .display-options-bar {
+            width: 100%; max-width: 1000px; margin-bottom: 20px;
+            background-color: #1e2233; border: 1px solid #2e344e; border-radius: 8px;
+            padding: 12px 20px; box-sizing: border-box; display: flex; flex-wrap: wrap;
+            gap: 20px; justify-content: center; align-items: center; font-size: 14px;
+        }
+        .options-group { display: flex; align-items: center; gap: 12px; }
+        .options-group span { font-weight: bold; color: #4FC3F7; }
+        .options-group label { cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .options-group input[type="radio"], .options-group input[type="checkbox"] { cursor: pointer; margin: 0; }
 
         .capture-wrapper { width: 100%; max-width: 1000px; margin-bottom: 30px; overflow: hidden; }
 
@@ -78,16 +90,12 @@
             #clearBtn { order: 1; }
             #downloadBtn { order: 2; }
             #uploadBtn { order: 3; flex: 1 1 100%; } 
+            .display-options-bar { flex-direction: column; gap: 10px; align-items: flex-start; padding: 15px; }
             .char-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .grid-item { height: 110px; }
             .grid-name { font-size: 11px; margin-bottom: 2px; }
             .grid-cp { font-size: 10px; }
             .pool-title { font-size: 15px; }
-        }
-        @media (max-width: 400px) {
-            .grid-item { height: 95px; }
-            .grid-name { font-size: 10px; }
-            .grid-cp { font-size: 9px; }
         }
     </style>
 </head>
@@ -98,6 +106,19 @@
         <button id="uploadBtn">📁 JSON 스펙 업로드</button>
         <button id="clearBtn">파티 초기화</button>
         <button id="downloadBtn">📸 스펙 카드 이미지 저장</button>
+    </div>
+
+    <div class="display-options-bar">
+        <div class="options-group">
+            <span>⚔️ 전투력 연산 기준</span>
+            <label><input type="radio" name="cpDisplay" value="current" checked onchange="updateAllViews()"> 싱크로/현재레벨</label>
+            <label><input type="radio" name="cpDisplay" value="lv40" onchange="updateAllViews()"> Lv.40 기준</label>
+            <label><input type="radio" name="cpDisplay" value="lv400" onchange="updateAllViews()"> Lv.400 기준</label>
+        </div>
+        <div style="border-left: 1px solid #4f5b82; height: 16px;" class="desktop-only"></div>
+        <div class="options-group">
+            <label><input type="checkbox" id="showOverload" checked onchange="updateAllViews()"> 🔷 오버로드 옵션 합산 노출</label>
+        </div>
     </div>
 
     <div class="capture-wrapper">
@@ -124,7 +145,7 @@
     </div>
 
     <script>
-let allCharacters = [];
+        let allCharacters = [];
         let selectedCharacters = [];
 
         function adjustScale() {
@@ -143,20 +164,33 @@ let allCharacters = [];
         }
         window.addEventListener('resize', adjustScale);
 
+        // 💡 [기능 패치] 필터 바 스위치에 따라 실시간 뷰 전환 지원
+        function updateAllViews() {
+            renderSlots();
+            renderGrid();
+        }
+
         function renderSlots() {
             const container = document.getElementById('slotsContainer');
             container.innerHTML = '';
             let partyCp = 0;
+
+            // 라디오 버튼 및 체크박스 값 파악
+            const cpMode = document.querySelector('input[name="cpDisplay"]:checked').value;
+            const isOvrVisible = document.getElementById('showOverload').checked;
 
             for (let i = 0; i < 5; i++) {
                 const char = selectedCharacters[i];
                 const slot = document.createElement('div');
                 
                 if (char) {
-                    partyCp += char.cp;
+                    // 💡 [하이브리드 대응] 구형 JSON 업로드 시 데이터 유실 방지용 예외 처리
+                    let targetCp = char.cp;
+                    if (cpMode === 'lv40') targetCp = char.cp40 || char.cp;
+                    if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
+
+                    partyCp += targetCp;
                     slot.className = 'slot filled';
-                    
-                    // 💡 [수정완료] 무조건 내 깃허브의 images/ 폴더에서만 가져옵니다!
                     const imgUrl = `images/${char.code}.webp`;
                     
                     slot.innerHTML = `
@@ -164,9 +198,9 @@ let allCharacters = [];
                         <div class="slot-content">
                             <div class="slot-badge">${char.break}</div>
                             <div class="slot-name">${char.name}</div>
-                            <div class="slot-cp">${char.cp.toLocaleString()}</div>
+                            <div class="slot-cp">${targetCp.toLocaleString()}</div>
                             <div class="slot-stats">S: ${char.skill} | E: ${char.equip}</div>
-                            <div class="slot-ovr">${char.overload !== '-' ? char.overload : '오버없음'}</div>
+                            <div class="slot-ovr" style="visibility: ${isOvrVisible ? 'visible' : 'hidden'};">${char.overload !== '-' ? char.overload : '오버없음'}</div>
                         </div>
                     `;
                     slot.onclick = () => removeChar(char);
@@ -184,21 +218,27 @@ let allCharacters = [];
 
         function renderGrid() {
             const grid = document.getElementById('charGrid');
+            if (allCharacters.length === 0) return;
             grid.innerHTML = '';
+
+            const cpMode = document.querySelector('input[name="cpDisplay"]:checked').value;
 
             allCharacters.forEach(char => {
                 const isSelected = selectedCharacters.includes(char);
                 const item = document.createElement('div');
                 item.className = `grid-item ${isSelected ? 'selected' : ''}`;
                 
-                // 💡 [수정완료] 여기도 무조건 내 깃허브 폴더에서 가져오게 수정!
+                let targetCp = char.cp;
+                if (cpMode === 'lv40') targetCp = char.cp40 || char.cp;
+                if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
+
                 const imgUrl = `images/${char.code}.webp`;
                 
                 item.innerHTML = `
                     <div class="grid-img" style="background-image: url('${imgUrl}');"></div>
                     <div class="grid-content">
                         <div class="grid-name">${char.name}</div>
-                        <div class="grid-cp">⚔️ ${char.cp.toLocaleString()}</div>
+                        <div class="grid-cp">⚔️ ${targetCp.toLocaleString()}</div>
                     </div>
                 `;
                 if (!isSelected) { item.onclick = () => addChar(char); }
@@ -222,7 +262,7 @@ let allCharacters = [];
 
             allCharacters = data.characters;
             selectedCharacters = allCharacters.slice(0, 5); 
-            renderSlots(); renderGrid();
+            updateAllViews();
         }
 
         window.addEventListener('message', (event) => {
@@ -258,7 +298,6 @@ let allCharacters = [];
             const captureTarget = document.getElementById('capture-area');
             const wrapper = document.querySelector('.capture-wrapper');
             
-            const originalTransform = captureTarget.style.transform;
             captureTarget.style.transform = 'none';
             wrapper.style.height = 'auto';
 
