@@ -55,9 +55,8 @@
         .header .total-cp { text-align: right; }
         .header .total-cp h2 { margin: 0; font-size: 28px; color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
 
-        .slots-container { display: flex; gap: 15px; justify-content: center; min-height: 240px; } /* 높이 살짝 증가 */
+        .slots-container { display: flex; gap: 15px; justify-content: center; min-height: 240px; } 
         
-        /* 💡 [CSS 패치] align/justify-center를 빼서 위아래로 늘어날 수 있게 해제 */
         .slot { flex: 1; background: #0f111a; border: 2px dashed #4f5b82; border-radius: 12px; display: flex; flex-direction: column; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; text-align: center; }
         .slot.filled { border: 2px solid #00E676; }
         .slot:hover { border-color: #4FC3F7; }
@@ -66,7 +65,6 @@
         .slot-img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center 15%; background-repeat: no-repeat; opacity: 0.35; z-index: 1; transition: 0.3s; }
         .slot:hover .slot-img { opacity: 0.6; transform: scale(1.05); }
         
-        /* 💡 [CSS 패치] space-between을 줘서 top과 bottom이 위아래로 착 달라붙게 설정 */
         .slot-content { position: relative; z-index: 2; width: 100%; height: 100%; padding: 15px 10px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
         
         .slot-top { display: flex; flex-direction: column; align-items: center; width: 100%; }
@@ -77,7 +75,9 @@
         
         .slot-cp { font-size: 24px; font-weight: 900; color: #FFD700; margin-bottom: 8px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
         .slot-stats { font-size: 12px; color: #fff; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 4px; width: 100%; box-sizing: border-box; margin-bottom: 5px; backdrop-filter: blur(2px); }
-        .slot-ovr { font-size: 11px; color: #81D4FA; word-break: keep-all; text-shadow: 1px 1px 2px #000; min-height: 14px; } /* 공간 확보용 min-height */
+        
+        /* 💡 빈 공간을 남기던 min-height 제거 */
+        .slot-ovr { font-size: 11px; color: #81D4FA; word-break: keep-all; text-shadow: 1px 1px 2px #000; } 
 
         .footer { margin-top: 20px; text-align: right; font-size: 11px; color: #4f5b82; }
 
@@ -204,7 +204,7 @@
                     slot.className = 'slot filled';
                     const imgUrl = `images/${char.code}.webp`;
                     
-                    // 💡 [HTML 구조 패치] 상단(slot-top)과 하단(slot-bottom)으로 HTML 태그를 분리했습니다!
+                    // 💡 [핵심 패치] visibility:hidden을 display:none으로 교체하여 빈 공간 완벽 삭제
                     slot.innerHTML = `
                         <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
                         <div class="slot-content">
@@ -215,7 +215,7 @@
                             <div class="slot-bottom">
                                 <div class="slot-cp">${targetCp.toLocaleString()}</div>
                                 <div class="slot-stats">S: ${char.skill} | E: ${char.equip}</div>
-                                <div class="slot-ovr" style="visibility: ${isOvrVisible ? 'visible' : 'hidden'};">${char.overload !== '-' ? char.overload : '오버없음'}</div>
+                                <div class="slot-ovr" style="display: ${isOvrVisible ? 'block' : 'none'};">${char.overload !== '-' ? char.overload : '오버없음'}</div>
                             </div>
                         </div>
                     `;
