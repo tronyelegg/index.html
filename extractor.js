@@ -6,25 +6,18 @@
             const overlay = document.createElement('div');
             overlay.id = 'nikke-dashboard-modal-overlay';
             Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: '2147483647', display: 'flex', justifyContent: 'center', alignItems: 'center' });
-            
             const modal = document.createElement('div');
             Object.assign(modal.style, { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', width: '90%', maxWidth: '340px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'sans-serif', color: '#333', textAlign: 'center' });
-            
             const title = document.createElement('div');
-            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor v16.7</span><br><span style="font-size:11px;color:#666;">Optimized Cloud Engine</span>';
+            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor v16.8</span><br><span style="font-size:11px;color:#666;">Multi-CP Data Engine</span>';
             title.style.borderBottom = '1px solid #eee'; title.style.paddingBottom = '10px';
-            
-            // 💡 [수정됨] 브라우저 오류 방지를 위해 <p> 대신 <div> 사용
             const status = document.createElement('div');
             status.id = 'nikke-status-text'; status.innerText = '서버 통신 중...';
             status.style.fontSize = '14px'; status.style.margin = '20px 0'; status.style.fontWeight = 'bold';
-            
             const closeBtn = document.createElement('button');
-            closeBtn.id = 'nikke-close-btn'; // 💡 [수정됨] 닫기 버튼 절대 잃어버리지 않게 ID 부여
-            closeBtn.innerText = '닫기';
+            closeBtn.id = 'nikke-close-btn'; closeBtn.innerText = '닫기';
             Object.assign(closeBtn.style, { padding: '8px 20px', backgroundColor: '#999', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', display: 'none', margin: '10px auto 0 auto' });
             closeBtn.onclick = () => overlay.remove();
-            
             modal.appendChild(title); modal.appendChild(status); modal.appendChild(closeBtn);
             overlay.appendChild(modal); document.body.appendChild(overlay);
         },
@@ -35,30 +28,18 @@
         finish: function(payload, excelBuffer, nickname) {
             const el = document.getElementById('nikke-status-text');
             if (!el) return;
-            
             el.innerHTML = `
                 <span style="color:#009688; font-size:15px; font-weight:bold;">✅ 데이터 추출 완벽 성공!</span><br>
                 <span style="font-size:12px; color:#666; display:block; margin:10px 0 15px 0;">원하시는 작업을 선택해주세요.</span>
-                
-                <button id="btn-web" style="width:100%; padding:14px; margin-bottom:10px; background-color:#3F51B5; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                    🚀 1. 스펙 빌더로 자동 전송
-                </button>
-                
-                <button id="btn-json" style="width:100%; padding:14px; margin-bottom:10px; background-color:#009688; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                    🔒 2. JSON 저장 후 사이트로 이동
-                </button>
-
-                <button id="btn-excel" style="width:100%; padding:14px; margin-bottom:5px; background-color:#2E7D32; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">
-                    📊 3. 엑셀(EXCEL) 파일로 저장
-                </button>
+                <button id="btn-web" style="width:100%; padding:14px; margin-bottom:10px; background-color:#3F51B5; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">🚀 1. 스펙 빌더로 자동 전송</button>
+                <button id="btn-json" style="width:100%; padding:14px; margin-bottom:10px; background-color:#009688; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">🔒 2. JSON 저장 후 사이트로 이동</button>
+                <button id="btn-excel" style="width:100%; padding:14px; margin-bottom:5px; background-color:#2E7D32; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">📊 3. 엑셀(EXCEL) 파일로 저장</button>
             `;
-            
             document.getElementById('btn-web').onclick = () => {
                 const newWin = window.open("https://tronyelegg.github.io/index.html", "_blank");
                 if (newWin) { setTimeout(() => { newWin.postMessage({ type: 'NIKKE_SPEC_DATA', payload: payload }, "*"); }, 2500); } 
                 else { alert("팝업 차단이 감지되었습니다."); }
             };
-            
             document.getElementById('btn-json').onclick = () => {
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
@@ -66,20 +47,16 @@
                 URL.revokeObjectURL(a.href);
                 setTimeout(() => window.open("https://tronyelegg.github.io/index.html", "_blank"), 500);
             };
-
             document.getElementById('btn-excel').onclick = () => {
                 const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
                 a.download = `NIKKE_CP_Dashboard_${nickname}.xlsx`; a.click();
                 URL.revokeObjectURL(a.href);
             };
-
-            // 💡 [수정됨] 이름표를 불러와서 무조건 강제로 보여주게 만듦
             const closeBtn = document.getElementById('nikke-close-btn');
             if (closeBtn) closeBtn.style.display = 'block';
         }
     };
-    
     ui.create();
 
     function loadScript(src) {
@@ -307,8 +284,19 @@
                             }
                             
                             wsMyData.addRow([cName, lvStatusStr, brkStr, favStr, skStr, eqStr, ovrDisp, aLv, getCp(40), getCp(synLevel), getCp(400)]);
-                            const resId = mInfo.resource_id || "";
-                            extracted.push({ code: cId, name: cName, break: brkStr, skill: skStr, equip: eqStr, overload: ovrDisp, cp: getCp(rLv), resource_id: resId });
+                            
+                            // 💡 [핵심 업데이트] 프론트웹에서 레벨별 토글을 지원하기 위해 cp40과 cp400을 패일로드에 추가하여 발송합니다!
+                            extracted.push({ 
+                                code: cId, 
+                                name: cName, 
+                                break: brkStr, 
+                                skill: skStr, 
+                                equip: eqStr, 
+                                overload: ovrDisp, 
+                                cp: getCp(rLv),
+                                cp40: getCp(40),
+                                cp400: getCp(400)
+                            });
                         } catch (e) {}
                     });
                 }
