@@ -432,11 +432,12 @@
             return result;
         }
 
-        // 캐릭터 코드를 보고 DB에서 이름을 꺼내오는 함수
+// 캐릭터 한국어 이름을 보고 DB에서 번역된 이름을 꺼내오는 함수
         function getCharName(code, fallbackName) {
             if (currentLang === 'ko') return fallbackName;
-            if (charNameDB[code] && charNameDB[code][currentLang]) {
-                return charNameDB[code][currentLang];
+            // 💡 [수정됨] code(ID) 대신 fallbackName(한국어 이름)을 Key로 사용하여 검색!
+            if (charNameDB[fallbackName] && charNameDB[fallbackName][currentLang]) {
+                return charNameDB[fallbackName][currentLang];
             }
             return fallbackName; // DB에 없으면 그냥 한국어 출력
         }
