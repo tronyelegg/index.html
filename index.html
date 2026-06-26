@@ -19,7 +19,6 @@
         .landing-header { text-align: center; margin-bottom: 5px; }
         .landing-header h1 { margin: 0; color: #fff; font-size: 28px; text-shadow: 0 0 15px rgba(79, 195, 247, 0.4); }
         
-        /* 💡 [CSS 패치] 공통 언어 버튼 스타일 */
         .lang-selector { text-align: center; font-size: 13px; margin-bottom: 10px; }
         .lang-btn { color: #4FC3F7; text-decoration: none; margin: 0 5px; cursor: pointer; transition: 0.2s; }
         .lang-btn:hover { text-decoration: underline; color: #81D4FA; }
@@ -126,7 +125,7 @@
 
         <div class="notice-banner">
             <strong data-i18n="notice_title">업데이트 안내 (2026/06/26)</strong>
-            <span data-i18n="notice_desc">Lv.40(유레) 및 Lv.400 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.</span>
+            <span data-i18n="notice_desc">Lv.40(협동전) 및 Lv.400(솔로 레이드) 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.</span>
         </div>
 
         <div class="section-block">
@@ -159,9 +158,9 @@
         <div class="section-block">
             <h2 class="section-title" data-i18n="note_title">주의사항</h2>
             <ul class="bullet-list">
-                <li data-i18n="note_1">새로운 캐릭터의 자켓 이미지가 누락되는 경우가 있을 수 있습니다.</li>
+                <li data-i18n="note_1">새로운 캐릭터의 이미지가 누락되는 경우가 있을 수 있습니다.</li>
                 <li data-i18n="note_2">미획득한 니케의 세부 장비 및 스킬 데이터는 불러올 수 없습니다.</li>
-                <li data-i18n="note_3">오버로드 옵션 합산 수치는 게임 내 표기 방식(반올림)에 따라 0.1~0.2%의 오차가 발생할 수 있습니다.</li>
+                <li data-i18n="note_3">전투력 수치는 게임 내 연산 방식(반올림)에 따라 약간의 오차가 발생할 수 있습니다.</li>
                 <li data-i18n="note_4">시프티패드 API 구조 변경 시 도구가 일시적으로 작동하지 않을 수 있습니다.</li>
             </ul>
         </div>
@@ -199,7 +198,6 @@
             <div class="options-group">
                 <label><input type="checkbox" id="showOverload" checked onchange="updateAllViews()"> <span data-i18n="opt_ovr">🔷 오버로드 옵션 합산 노출</span></label>
             </div>
-            <!-- 💡 [UI 패치] 빌더 화면용 언어 선택기 추가 -->
             <div style="border-left: 1px solid #4f5b82; height: 16px;" class="desktop-only"></div>
             <div class="options-group">
                 <span data-i18n="str_lang">🌐 언어</span>
@@ -233,11 +231,11 @@
 
     <!-- ✨ 3. 자바스크립트 (로직 제어 및 다국어 지원) -->
     <script>
-/* ---------- 다국어 (i18n) 번역 사전 ---------- */
+        /* ---------- 다국어 (i18n) 번역 사전 ---------- */
         const translations = {
             "ko": {
                 "notice_title": "업데이트 안내 (2026/06/26)",
-                "notice_desc": "Lv.40(협동작전) 및 Lv.400(솔로 레이드) 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.",
+                "notice_desc": "Lv.40(협동전) 및 Lv.400(솔로 레이드) 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.",
                 "intro_title": "소개",
                 "intro_desc1": "이 도구는 인게임 데이터를 바탕으로 파티 스펙 카드를 예쁘게 생성해주는 도구입니다.",
                 "intro_warn": "이 도구는 비공식 팬메이드 도구입니다. SHIFT UP 및 Level Infinite에게 이 도구에 대해 문의하지 마세요.",
@@ -365,8 +363,274 @@
                 "str_loaded": "のデータ読み込み完了！"
             }
         };
+
+        const termDict = {
+            "명함": { "en": "LB0", "ja": "無凸" },
+            "1돌": { "en": "LB1", "ja": "1凸" },
+            "2돌": { "en": "LB2", "ja": "2凸" },
+            "풀돌": { "en": "MLB", "ja": "3凸" },
+            "1코강": { "en": "Core 1", "ja": "コア1" },
+            "2코강": { "en": "Core 2", "ja": "コア2" },
+            "3코강": { "en": "Core 3", "ja": "コア3" },
+            "4코강": { "en": "Core 4", "ja": "コア4" },
+            "5코강": { "en": "Core 5", "ja": "コア5" },
+            "6코강": { "en": "Core 6", "ja": "コア6" },
+            "풀코": { "en": "Max Core", "ja": "完凸" },
+            "우코": { "en": "Ele", "ja": "有利" },
+            "공증": { "en": "ATK", "ja": "攻撃" },
+            "장탄": { "en": "Ammo", "ja": "装弾" },
+            "명중": { "en": "Hit", "ja": "命中" },
+            "차댐": { "en": "ChgDmg", "ja": "チャダメ" },
+            "차속": { "en": "ChgSpd", "ja": "チャ速" },
+            "크확": { "en": "CritRt", "ja": "クリ率" },
+            "크뎀": { "en": "CritDmg", "ja": "クリダメ" },
+            "방증": { "en": "DEF", "ja": "防御" }
+        };
+
+        let currentLang = 'ko'; 
+        let charNameDB = {}; 
+
+        fetch('nikke_names.json')
+            .then(res => res.json())
+            .then(data => { charNameDB = data; console.log("✅ 다국어 이름 DB 로드 완료"); })
+            .catch(err => console.warn("⚠️ nikke_names.json을 찾을 수 없습니다."));
+
+        function t(key) { return translations[currentLang][key]; }
+
+        function translateTerms(text) {
+            if (currentLang === 'ko' || !text) return text;
+            let result = text;
+            for (const [koTerm, trans] of Object.entries(termDict)) {
+                result = result.replace(new RegExp(koTerm, 'g'), trans[currentLang] || koTerm);
+            }
+            return result;
+        }
+
+        function getCharName(code, fallbackName) {
+            if (currentLang === 'ko') return fallbackName;
+            if (charNameDB[fallbackName] && charNameDB[fallbackName][currentLang]) {
+                return charNameDB[fallbackName][currentLang];
+            }
+            return fallbackName; 
+        }
+
+        function changeLang(lang) {
+            currentLang = lang;
+            
+            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`.lang-btn-${lang}`).forEach(el => el.classList.add('active'));
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[lang][key]) { el.innerHTML = translations[lang][key]; }
+            });
+
+            if (pendingData) {
+                activateLandingState(pendingData);
+                document.getElementById('serverInfo').innerText = `${t('str_server')}: ${pendingData.server} | ${t('str_sync')}: Lv.${pendingData.synchroLevel}`;
+            }
+            if(document.getElementById('builder-view').style.display !== 'none') {
+                updateAllViews();
+            }
+        }
+
+        let allCharacters = [];
+        let selectedCharacters = [];
+        let pendingData = null; 
+
+        /* ---------- 랜딩 페이지 로직 ---------- */
+        function copyCode() {
+            const code = document.getElementById('bookmarkletCode').innerText;
+            navigator.clipboard.writeText(code).then(() => { alert(t('msg_copied')); })
+            .catch(err => { alert(t('msg_copy_fail')); });
+        }
+
+        function activateLandingState(data) {
+            pendingData = data;
+            const statusBox = document.getElementById('dataStatus');
+            statusBox.innerHTML = `✅ <b>${data.playerName}</b>${t('str_loaded')}<br><span style="font-size:12px; font-weight:normal;">(${t('str_server')}: ${data.server} | ${t('str_sync')}: Lv.${data.synchroLevel} | ${t('str_collected')}: ${data.characters.length})</span>`;
+            statusBox.classList.add('active');
+
+            const genBtn = document.getElementById('generateBtn');
+            genBtn.disabled = false;
+            genBtn.classList.add('active');
+            
+            if(document.getElementById('landing-view').style.display !== 'none') {
+                document.getElementById('generateBtn').click(); 
+            }
+        }
+
+        document.getElementById('landingJsonUpload').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && data.characters) { activateLandingState(data); } 
+                    else { alert(t('msg_invalid_json')); }
+                } catch (error) { alert(t('msg_read_error')); }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        });
+
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { activateLandingState(event.data.payload); }
+        });
+
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            if (!pendingData) return;
+            document.getElementById('landing-view').style.display = 'none';
+            document.getElementById('builder-view').style.display = 'flex';
+            window.scrollTo(0, 0); 
+            
+            document.getElementById('playerName').innerText = pendingData.playerName;
+            document.getElementById('serverInfo').innerText = `${t('str_server')}: ${pendingData.server} | ${t('str_sync')}: Lv.${pendingData.synchroLevel}`;
+            const now = new Date();
+            document.getElementById('timeStamp').innerText = `Generated by NIKKE Spec Builder | ${now.toLocaleString()}`;
+
+            allCharacters = pendingData.characters;
+            selectedCharacters = allCharacters.slice(0, 5); 
+            updateAllViews();
+            setTimeout(adjustScale, 100);
+        });
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('builder-view').style.display = 'none';
+            document.getElementById('landing-view').style.display = 'flex';
+        });
+
+        /* ---------- 스펙 빌더 로직 ---------- */
+        function adjustScale() {
+            const wrapper = document.querySelector('.capture-wrapper');
+            const area = document.getElementById('capture-area');
+            const wWidth = wrapper.clientWidth;
+            if (wWidth < 1000) {
+                const s = wWidth / 1000;
+                area.style.transform = `scale(${s})`;
+                area.style.transformOrigin = 'top left';
+                wrapper.style.height = `${area.offsetHeight * s}px`;
+            } else {
+                area.style.transform = 'none';
+                wrapper.style.height = 'auto';
+            }
+        }
+        window.addEventListener('resize', adjustScale);
+
+        function updateAllViews() {
+            renderSlots();
+            renderGrid();
+        }
+
+        function renderSlots() {
+            const container = document.getElementById('slotsContainer');
+            container.innerHTML = '';
+            let partyCp = 0;
+
+            const cpMode = document.querySelector('input[name="cpDisplay"]:checked').value;
+            const isOvrVisible = document.getElementById('showOverload').checked;
+
+            for (let i = 0; i < 5; i++) {
+                const char = selectedCharacters[i];
+                const slot = document.createElement('div');
+                
+                if (char) {
+                    let targetCp = char.cp;
+                    if (cpMode === 'lv40') targetCp = char.cp40 || char.cp;
+                    if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
+
+                    partyCp += targetCp;
+                    slot.className = 'slot filled';
+                    const imgUrl = `images/${char.code}.webp`;
+                    
+                    const dispName = getCharName(char.code, char.name);
+                    const dispBreak = translateTerms(char.break);
+                    let ovrText = char.overload !== '-' ? char.overload : t('str_no_ovr');
+                    const dispOvr = translateTerms(ovrText);
+                    
+                    slot.innerHTML = `
+                        <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
+                        <div class="slot-content">
+                            <div class="slot-top">
+                                <div class="slot-badge">${dispBreak}</div>
+                                <div class="slot-name">${dispName}</div>
+                            </div>
+                            <div class="slot-bottom">
+                                <div class="slot-cp">${targetCp.toLocaleString()}</div>
+                                <div class="slot-stats">S: ${char.skill} | E: ${char.equip}</div>
+                                <div class="slot-ovr" style="display: ${isOvrVisible ? 'block' : 'none'};">${dispOvr}</div>
+                            </div>
+                        </div>
+                    `;
+                    slot.onclick = () => removeChar(char);
+                } else {
+                    slot.className = 'slot';
+                    slot.innerHTML = `<div class="empty-icon">+</div>`;
+                }
+                container.appendChild(slot);
+            }
+            document.getElementById('totalCp').innerText = partyCp.toLocaleString();
+            document.getElementById('downloadBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
+            document.getElementById('clearBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
+            setTimeout(adjustScale, 50);
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('charGrid');
+            if (allCharacters.length === 0) return;
+            grid.innerHTML = '';
+
+            const cpMode = document.querySelector('input[name="cpDisplay"]:checked').value;
+
+            allCharacters.forEach(char => {
+                const isSelected = selectedCharacters.includes(char);
+                const item = document.createElement('div');
+                item.className = `grid-item ${isSelected ? 'selected' : ''}`;
+                
+                let targetCp = char.cp;
+                if (cpMode === 'lv40') targetCp = char.cp40 || char.cp;
+                if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
+
+                const imgUrl = `images/${char.code}.webp`;
+                const dispName = getCharName(char.code, char.name);
+                
+                item.innerHTML = `
+                    <div class="grid-img" style="background-image: url('${imgUrl}');"></div>
+                    <div class="grid-content">
+                        <div class="grid-name">${dispName}</div>
+                        <div class="grid-cp">⚔️ ${targetCp.toLocaleString()}</div>
+                    </div>
+                `;
+                if (!isSelected) { item.onclick = () => addChar(char); }
+                grid.appendChild(item);
+            });
+        }
+
+        function addChar(char) {
+            if (selectedCharacters.length < 5) { selectedCharacters.push(char); renderSlots(); renderGrid(); } 
+            else { alert(t('msg_max_party')); }
+        }
+        function removeChar(char) { selectedCharacters = selectedCharacters.filter(c => c !== char); renderSlots(); renderGrid(); }
+
+        document.getElementById('clearBtn').onclick = () => { selectedCharacters = []; renderSlots(); renderGrid(); };
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            const captureTarget = document.getElementById('capture-area');
+            const wrapper = document.querySelector('.capture-wrapper');
+            
+            captureTarget.style.transform = 'none';
+            wrapper.style.height = 'auto';
+
+            html2canvas(captureTarget, { backgroundColor: '#12151f', scale: 2, scrollX: 0, scrollY: 0 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `NIKKE_Party_${document.getElementById('playerName').innerText}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                adjustScale();
+            });
+        });
         
-        // 초기 언어 설정 (한국어)
         changeLang('ko');
     </script>
 </body>
