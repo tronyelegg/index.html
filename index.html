@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NIKKE Party Spec Builder</title>
+    <title>NIKKE Spec Card Generator</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         /* 💎 다크 테크웨어 베이스 설정 */
@@ -14,6 +14,71 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
+        /* -------------------------------------------
+           ✨ [신규] 랜딩 페이지(메인 화면) 스타일
+        ------------------------------------------- */
+        #landing-view {
+            width: 100%; max-width: 600px;
+            display: flex; flex-direction: column; gap: 20px;
+            margin-top: 20px;
+        }
+        .panel {
+            background-color: #1e2233; border: 1px solid #2e344e; border-radius: 12px;
+            padding: 25px; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        .panel-title {
+            font-size: 18px; font-weight: bold; color: #4FC3F7; border-bottom: 1px solid #2e344e;
+            padding-bottom: 10px; margin-top: 0; margin-bottom: 15px; text-align: center;
+        }
+        .landing-header { text-align: center; margin-bottom: 10px; }
+        .landing-header h1 { margin: 0; color: #fff; font-size: 28px; text-shadow: 0 0 15px rgba(79, 195, 247, 0.4); }
+        .landing-header p { color: #8892b0; font-size: 14px; margin-top: 8px; }
+        
+        .code-box {
+            background-color: #0f111a; border: 1px dashed #4f5b82; border-radius: 6px;
+            padding: 12px; font-family: monospace; font-size: 12px; color: #a6accd;
+            word-break: break-all; margin-bottom: 15px;
+        }
+        .copy-btn {
+            width: 100%; padding: 12px; background-color: #3F51B5; color: white; font-weight: bold;
+            border: none; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .copy-btn:hover { background-color: #5C6BC0; }
+        
+        .info-text { font-size: 13px; color: #a6accd; line-height: 1.6; }
+        .info-text ul { padding-left: 20px; margin-top: 5px; }
+        .info-text li { margin-bottom: 5px; }
+
+        .upload-section { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .file-upload-btn {
+            background-color: #4f5b82; color: white; border: none; padding: 10px 20px;
+            border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s;
+        }
+        .file-upload-btn:hover { background-color: #5c6bc0; }
+        
+        .status-box {
+            width: 100%; border: 2px dashed #4f5b82; border-radius: 8px; padding: 20px;
+            text-align: center; font-size: 14px; font-weight: bold; color: #8892b0; box-sizing: border-box;
+            background-color: #12151f; transition: 0.3s;
+        }
+        .status-box.active { border-color: #00E676; color: #00E676; background-color: rgba(0, 230, 118, 0.05); }
+
+        #generateBtn {
+            width: 100%; padding: 16px; background-color: #333; color: #888; font-size: 18px;
+            font-weight: bold; border: none; border-radius: 8px; cursor: not-allowed; transition: 0.3s;
+            margin-top: 10px;
+        }
+        #generateBtn.active {
+            background-color: #00E676; color: #000; cursor: pointer; box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
+        }
+        #generateBtn.active:hover { transform: translateY(-2px); }
+
+        /* -------------------------------------------
+           ✨ 기존 빌더 화면 스타일 (숨김 처리 상태로 시작)
+        ------------------------------------------- */
+        #builder-view {
+            width: 100%; display: none; flex-direction: column; align-items: center;
+        }
         .top-controls { 
             width: 100%; max-width: 1000px;
             margin-bottom: 10px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; 
@@ -26,7 +91,7 @@
         }
         .top-controls button:hover { transform: translateY(-2px); filter: brightness(1.1); }
         
-        #uploadBtn { background-color: #9C27B0; }
+        #backBtn { background-color: #4f5b82; }
         #clearBtn { background-color: #E91E63; display: none; }
         #downloadBtn { background-color: #00E676; color: #000; display: none; }
 
@@ -75,8 +140,6 @@
         
         .slot-cp { font-size: 24px; font-weight: 900; color: #FFD700; margin-bottom: 8px; text-shadow: 1px 1px 5px rgba(0,0,0,0.8); }
         .slot-stats { font-size: 12px; color: #fff; background: rgba(0,0,0,0.6); padding: 5px; border-radius: 4px; width: 100%; box-sizing: border-box; margin-bottom: 5px; backdrop-filter: blur(2px); }
-        
-        /* 💡 빈 공간을 남기던 min-height 제거 */
         .slot-ovr { font-size: 11px; color: #81D4FA; word-break: keep-all; text-shadow: 1px 1px 2px #000; } 
 
         .footer { margin-top: 20px; text-align: right; font-size: 11px; color: #4f5b82; }
@@ -96,9 +159,6 @@
         @media (max-width: 600px) {
             body { padding: 10px; }
             .top-controls button { flex: 1 1 45%; } 
-            #clearBtn { order: 1; }
-            #downloadBtn { order: 2; }
-            #uploadBtn { order: 3; flex: 1 1 100%; } 
             .display-options-bar { flex-direction: column; gap: 10px; align-items: flex-start; padding: 15px; }
             .char-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
             .grid-item { height: 110px; }
@@ -106,62 +166,176 @@
             .grid-cp { font-size: 10px; }
             .pool-title { font-size: 15px; }
         }
-        @media (max-width: 400px) {
-            .grid-item { height: 95px; }
-            .grid-name { font-size: 10px; }
-            .grid-cp { font-size: 9px; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="top-controls">
-        <input type="file" id="jsonUpload" accept=".json" style="display: none;">
-        <button id="uploadBtn">📁 JSON 스펙 업로드</button>
-        <button id="clearBtn">파티 초기화</button>
-        <button id="downloadBtn">📸 스펙 카드 이미지 저장</button>
-    </div>
-
-    <div class="display-options-bar">
-        <div class="options-group">
-            <span>⚔️ 전투력 연산 기준</span>
-            <label><input type="radio" name="cpDisplay" value="current" checked onchange="updateAllViews()"> 싱크로/현재레벨</label>
-            <label><input type="radio" name="cpDisplay" value="lv40" onchange="updateAllViews()"> Lv.40 기준</label>
-            <label><input type="radio" name="cpDisplay" value="lv400" onchange="updateAllViews()"> Lv.400 기준</label>
+    <div id="landing-view">
+        <div class="landing-header">
+            <h1>NIKKE Spec Card Generator</h1>
+            <p>시프티패드 데이터를 기반으로 파티 스펙 카드를 생성하는 비공식 도구입니다.</p>
         </div>
-        <div style="border-left: 1px solid #4f5b82; height: 16px;" class="desktop-only"></div>
-        <div class="options-group">
-            <label><input type="checkbox" id="showOverload" checked onchange="updateAllViews()"> 🔷 오버로드 옵션 합산 노출</label>
-        </div>
-    </div>
 
-    <div class="capture-wrapper">
-        <div id="capture-area">
-            <div class="header">
-                <div>
-                    <h1 id="playerName">WAITING...</h1>
-                    <div class="server-info" id="serverInfo">서버: - | 싱크로 레벨: -</div>
-                </div>
-                <div class="total-cp">
-                    <span style="font-size: 13px; color: #8892b0;">Party Combat Power</span>
-                    <h2 id="totalCp">0</h2>
-                </div>
+        <div class="panel">
+            <h2 class="panel-title">1. 데이터 가져오기 (권장)</h2>
+            <div class="info-text">
+                PC 블라블라링크(시프티패드) 도감 페이지에 접속 후, 아래의 북마크릿 코드를 주소창(또는 개발자 도구 F12 콘솔)에 붙여넣고 실행해주세요.
             </div>
+            <div class="code-box" id="bookmarkletCode">javascript:(function(){var s=document.createElement('script');s.src='https://tronyelegg.github.io/index.html/extractor.js?t='+Date.now();document.body.appendChild(s);})();</div>
+            <button class="copy-btn" onclick="copyCode()">📋 북마크릿 코드 복사하기</button>
+            <div class="info-text" style="margin-top: 15px; color:#E91E63; font-weight:bold;">
+                ※ 추출 완료 후 '스펙 빌더로 자동 전송' 버튼을 누르면 이 화면으로 데이터가 즉시 넘어옵니다.
+            </div>
+        </div>
 
-            <div class="slots-container" id="slotsContainer"></div>
-            <div class="footer" id="timeStamp">Generated by NIKKE Spec Builder</div>
+        <div class="panel">
+            <h2 class="panel-title">2. 플레이어 데이터 (JSON) 업로드</h2>
+            <div class="upload-section">
+                <span class="info-text">추출기에서 다운로드 받은 .json 파일이 있다면 직접 올려주세요.</span>
+                <input type="file" id="landingJsonUpload" accept=".json" style="display: none;">
+                <button class="file-upload-btn" onclick="document.getElementById('landingJsonUpload').click()">📁 파일 선택</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">데이터 상태 확인</h2>
+            <div id="dataStatus" class="status-box">
+                데이터 대기 중... (북마크릿 전송 또는 파일 업로드 필요)
+            </div>
+            <button id="generateBtn" disabled>스펙 카드 생성</button>
+        </div>
+        
+        <div class="info-text" style="text-align:center; margin-top:10px;">
+            이 사이트는 개인정보를 수집하지 않으며, 모든 처리는 브라우저 내부에서만 이루어집니다.
         </div>
     </div>
 
-    <div class="pool-title">내 니케 목록 (클릭하여 상단 슬롯에 편성하세요)</div>
-    <div class="char-grid" id="charGrid">
-        <div class="placeholder">게임에서 스니펫을 실행하여 데이터를 전송하거나 JSON 파일을 업로드해주세요.</div>
+    <div id="builder-view">
+        <div class="top-controls">
+            <button id="backBtn">⬅️ 메인으로 돌아가기</button>
+            <button id="clearBtn">파티 초기화</button>
+            <button id="downloadBtn">📸 스펙 카드 이미지 저장</button>
+        </div>
+
+        <div class="display-options-bar">
+            <div class="options-group">
+                <span>⚔️ 전투력 연산 기준</span>
+                <label><input type="radio" name="cpDisplay" value="current" checked onchange="updateAllViews()"> 싱크로/현재레벨</label>
+                <label><input type="radio" name="cpDisplay" value="lv40" onchange="updateAllViews()"> Lv.40 기준</label>
+                <label><input type="radio" name="cpDisplay" value="lv400" onchange="updateAllViews()"> Lv.400 기준</label>
+            </div>
+            <div style="border-left: 1px solid #4f5b82; height: 16px;" class="desktop-only"></div>
+            <div class="options-group">
+                <label><input type="checkbox" id="showOverload" checked onchange="updateAllViews()"> 🔷 오버로드 옵션 합산 노출</label>
+            </div>
+        </div>
+
+        <div class="capture-wrapper">
+            <div id="capture-area">
+                <div class="header">
+                    <div>
+                        <h1 id="playerName">WAITING...</h1>
+                        <div class="server-info" id="serverInfo">서버: - | 싱크로 레벨: -</div>
+                    </div>
+                    <div class="total-cp">
+                        <span style="font-size: 13px; color: #8892b0;">Party Combat Power</span>
+                        <h2 id="totalCp">0</h2>
+                    </div>
+                </div>
+
+                <div class="slots-container" id="slotsContainer"></div>
+                <div class="footer" id="timeStamp">Generated by NIKKE Spec Builder</div>
+            </div>
+        </div>
+
+        <div class="pool-title">내 니케 목록 (클릭하여 상단 슬롯에 편성하세요)</div>
+        <div class="char-grid" id="charGrid"></div>
     </div>
 
     <script>
         let allCharacters = [];
         let selectedCharacters = [];
+        let pendingData = null; // 업로드된 데이터를 임시 보관하는 변수
 
+        /* ---------- 랜딩 페이지 로직 ---------- */
+        function copyCode() {
+            const code = document.getElementById('bookmarkletCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert("북마크릿 코드가 복사되었습니다! \n블라블라링크 접속 후 주소창이나 콘솔창에 붙여넣으세요.");
+            }).catch(err => {
+                alert("복사에 실패했습니다. 수동으로 드래그하여 복사해주세요.");
+            });
+        }
+
+        // 데이터가 들어왔을 때 상태 박스와 생성 버튼을 켜주는 함수
+        function activateLandingState(data) {
+            pendingData = data;
+            const statusBox = document.getElementById('dataStatus');
+            statusBox.innerHTML = `✅ <b>${data.playerName}</b>님의 데이터 로드 완료!<br><span style="font-size:12px; font-weight:normal;">(서버: ${data.server} | 싱크로: Lv.${data.synchroLevel} | 수집: ${data.characters.length}명)</span>`;
+            statusBox.classList.add('active');
+
+            const genBtn = document.getElementById('generateBtn');
+            genBtn.disabled = false;
+            genBtn.classList.add('active');
+            
+            // 데이터가 팝업/연동으로 넘어오면 사용자 편의를 위해 자동으로 생성 버튼 클릭 효과 부여
+            // 만약 자동으로 넘어가는게 싫으시다면 아래 줄을 지우시면 됩니다.
+            document.getElementById('generateBtn').click(); 
+        }
+
+        // JSON 파일 직접 업로드 (랜딩 페이지)
+        document.getElementById('landingJsonUpload').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data && data.characters) {
+                        activateLandingState(data);
+                    } else {
+                        alert("🚨 올바른 NIKKE 스펙 JSON 파일이 아닙니다.");
+                    }
+                } catch (error) {
+                    alert("🚨 파일을 읽는 중 오류가 발생했습니다.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        });
+
+        // 스니펫에서 PostMessage로 쏜 데이터 수신 (랜딩 페이지)
+        window.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { 
+                activateLandingState(event.data.payload); 
+            }
+        });
+
+        // 생성 버튼 클릭 시 뷰 전환 및 빌더 초기화
+        document.getElementById('generateBtn').addEventListener('click', () => {
+            if (!pendingData) return;
+            document.getElementById('landing-view').style.display = 'none';
+            document.getElementById('builder-view').style.display = 'flex';
+            
+            // 빌더 초기화 함수 호출
+            document.getElementById('playerName').innerText = pendingData.playerName;
+            document.getElementById('serverInfo').innerText = `서버: ${pendingData.server} | 싱크로 레벨: Lv.${pendingData.synchroLevel}`;
+            const now = new Date();
+            document.getElementById('timeStamp').innerText = `Generated by NIKKE Spec Builder | ${now.toLocaleString()}`;
+
+            allCharacters = pendingData.characters;
+            selectedCharacters = allCharacters.slice(0, 5); // 상위 5명 자동 편성
+            updateAllViews();
+            setTimeout(adjustScale, 100);
+        });
+
+        // 돌아가기 버튼 클릭 시
+        document.getElementById('backBtn').addEventListener('click', () => {
+            document.getElementById('builder-view').style.display = 'none';
+            document.getElementById('landing-view').style.display = 'flex';
+        });
+
+        /* ---------- 스펙 빌더 로직 ---------- */
         function adjustScale() {
             const wrapper = document.querySelector('.capture-wrapper');
             const area = document.getElementById('capture-area');
@@ -204,7 +378,6 @@
                     slot.className = 'slot filled';
                     const imgUrl = `images/${char.code}.webp`;
                     
-                    // 💡 [핵심 패치] visibility:hidden을 display:none으로 교체하여 빈 공간 완벽 삭제
                     slot.innerHTML = `
                         <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
                         <div class="slot-content">
@@ -270,46 +443,6 @@
 
         document.getElementById('clearBtn').onclick = () => { selectedCharacters = []; renderSlots(); renderGrid(); };
 
-        function initData(data) {
-            document.getElementById('playerName').innerText = data.playerName;
-            document.getElementById('serverInfo').innerText = `서버: ${data.server} | 싱크로 레벨: Lv.${data.synchroLevel}`;
-            const now = new Date();
-            document.getElementById('timeStamp').innerText = `Generated by NIKKE Spec Builder | ${now.toLocaleString()}`;
-
-            allCharacters = data.characters;
-            selectedCharacters = allCharacters.slice(0, 5); 
-            updateAllViews();
-        }
-
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { initData(event.data.payload); }
-        });
-
-        document.getElementById('uploadBtn').addEventListener('click', () => {
-            document.getElementById('jsonUpload').click();
-        });
-
-        document.getElementById('jsonUpload').addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data && data.characters) {
-                        initData(data);
-                    } else {
-                        alert("🚨 올바른 NIKKE 스펙 JSON 파일이 아닙니다.");
-                    }
-                } catch (error) {
-                    alert("🚨 파일을 읽는 중 오류가 발생했습니다.");
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        });
-
         document.getElementById('downloadBtn').addEventListener('click', () => {
             const captureTarget = document.getElementById('capture-area');
             const wrapper = document.querySelector('.capture-wrapper');
@@ -325,8 +458,6 @@
                 adjustScale();
             });
         });
-
-        renderSlots();
     </script>
 </body>
 </html>
