@@ -15,65 +15,34 @@
             line-height: 1.6;
         }
 
-        #landing-view {
-            width: 100%; max-width: 650px;
-            display: flex; flex-direction: column; gap: 25px;
-            margin-top: 10px; padding-bottom: 50px;
-        }
-        
+        #landing-view { width: 100%; max-width: 650px; display: flex; flex-direction: column; gap: 25px; margin-top: 10px; padding-bottom: 50px; }
         .landing-header { text-align: center; margin-bottom: 5px; }
         .landing-header h1 { margin: 0; color: #fff; font-size: 28px; text-shadow: 0 0 15px rgba(79, 195, 247, 0.4); }
         
+        /* 💡 [CSS 패치] 공통 언어 버튼 스타일 */
         .lang-selector { text-align: center; font-size: 13px; margin-bottom: 10px; }
-        .lang-selector a { color: #4FC3F7; text-decoration: none; margin: 0 5px; cursor: pointer; }
-        .lang-selector a:hover { text-decoration: underline; }
-        .lang-selector a.active { color: #fff; font-weight: bold; pointer-events: none; text-decoration: none; }
+        .lang-btn { color: #4FC3F7; text-decoration: none; margin: 0 5px; cursor: pointer; transition: 0.2s; }
+        .lang-btn:hover { text-decoration: underline; color: #81D4FA; }
+        .lang-btn.active { color: #fff; font-weight: bold; pointer-events: none; text-decoration: none; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         
-        .notice-banner {
-            background-color: #3F51B5; color: white; border-radius: 8px;
-            padding: 15px; text-align: center; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+        .notice-banner { background-color: #3F51B5; color: white; border-radius: 8px; padding: 15px; text-align: center; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .notice-banner strong { display: block; font-size: 16px; margin-bottom: 5px; }
 
         .section-block { display: flex; flex-direction: column; align-items: center; text-align: center; }
-        .section-title {
-            font-size: 20px; font-weight: bold; color: #fff; 
-            margin-top: 0; margin-bottom: 15px;
-        }
-        
+        .section-title { font-size: 20px; font-weight: bold; color: #fff; margin-top: 0; margin-bottom: 15px; }
         .desc-text { font-size: 14px; margin-bottom: 10px; word-break: keep-all; }
         .warning-red { color: #FF5252; font-weight: bold; margin: 15px 0; }
-        
-        .code-box {
-            background-color: #0f111a; border: 1px dashed #8892b0; border-radius: 6px;
-            padding: 15px; font-family: monospace; font-size: 13px; color: #fff;
-            word-break: break-all; width: 100%; box-sizing: border-box; text-align: left;
-            margin: 15px 0;
-        }
-        
-        .btn-green {
-            background-color: #00E676; color: #000; font-weight: bold; padding: 12px 25px;
-            border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 15px;
-        }
+        .code-box { background-color: #0f111a; border: 1px dashed #8892b0; border-radius: 6px; padding: 15px; font-family: monospace; font-size: 13px; color: #fff; word-break: break-all; width: 100%; box-sizing: border-box; text-align: left; margin: 15px 0; }
+        .btn-green { background-color: #00E676; color: #000; font-weight: bold; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 15px; }
         .btn-green:hover { background-color: #00C853; transform: translateY(-2px); }
-        
         .bullet-list { text-align: left; font-size: 14px; background: #1e2233; padding: 20px 20px 20px 40px; border-radius: 8px; width: 100%; box-sizing: border-box;}
         .bullet-list li { margin-bottom: 8px; }
 
-        .status-box {
-            width: 100%; border: 2px dashed #4f5b82; border-radius: 8px; padding: 20px;
-            text-align: center; font-size: 14px; font-weight: bold; color: #8892b0; box-sizing: border-box;
-            background-color: #12151f; transition: 0.3s; margin-bottom: 10px;
-        }
+        .status-box { width: 100%; border: 2px dashed #4f5b82; border-radius: 8px; padding: 20px; text-align: center; font-size: 14px; font-weight: bold; color: #8892b0; box-sizing: border-box; background-color: #12151f; transition: 0.3s; margin-bottom: 10px; }
         .status-box.active { border-color: #00E676; color: #00E676; background-color: rgba(0, 230, 118, 0.05); }
 
-        #generateBtn {
-            width: 100%; padding: 16px; background-color: #333; color: #888; font-size: 18px;
-            font-weight: bold; border: none; border-radius: 8px; cursor: not-allowed; transition: 0.3s;
-        }
-        #generateBtn.active {
-            background-color: #00E676; color: #000; cursor: pointer; box-shadow: 0 0 15px rgba(0, 230, 118, 0.4);
-        }
+        #generateBtn { width: 100%; padding: 16px; background-color: #333; color: #888; font-size: 18px; font-weight: bold; border: none; border-radius: 8px; cursor: not-allowed; transition: 0.3s; }
+        #generateBtn.active { background-color: #00E676; color: #000; cursor: pointer; box-shadow: 0 0 15px rgba(0, 230, 118, 0.4); }
         #generateBtn.active:hover { transform: translateY(-2px); }
 
         .footer-credit { text-align: center; font-size: 12px; color: #4f5b82; margin-top: 20px; border-top: 1px solid #2e344e; padding-top: 15px; }
@@ -143,22 +112,21 @@
 </head>
 <body>
 
-    <!-- ✨ 1. 랜딩 페이지 (처음 접속 시 보이는 화면) -->
+    <!-- ✨ 1. 랜딩 페이지 -->
     <div id="landing-view">
         <div class="landing-header">
             <h1>NIKKE Spec Card Generator</h1>
         </div>
 
-        <!-- 언어 선택기 -->
         <div class="lang-selector">
-            <a onclick="changeLang('ko')" id="lang-ko" class="active">한국어</a> | 
-            <a onclick="changeLang('en')" id="lang-en">English</a> | 
-            <a onclick="changeLang('ja')" id="lang-ja">日本語</a>
+            <a onclick="changeLang('ko')" class="lang-btn lang-btn-ko active">한국어</a> | 
+            <a onclick="changeLang('en')" class="lang-btn lang-btn-en">English</a> | 
+            <a onclick="changeLang('ja')" class="lang-btn lang-btn-ja">日本語</a>
         </div>
 
         <div class="notice-banner">
             <strong data-i18n="notice_title">업데이트 안내 (2026/06/26)</strong>
-            <span data-i18n="notice_desc">Lv.40 및 Lv.400 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.</span>
+            <span data-i18n="notice_desc">Lv.40(유레) 및 Lv.400 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.</span>
         </div>
 
         <div class="section-block">
@@ -191,9 +159,9 @@
         <div class="section-block">
             <h2 class="section-title" data-i18n="note_title">주의사항</h2>
             <ul class="bullet-list">
-                <li data-i18n="note_1">신규 니케의 이미지가 누락되는 경우가 있을 수 있습니다.</li>
+                <li data-i18n="note_1">새로운 캐릭터의 자켓 이미지가 누락되는 경우가 있을 수 있습니다.</li>
                 <li data-i18n="note_2">미획득한 니케의 세부 장비 및 스킬 데이터는 불러올 수 없습니다.</li>
-                <li data-i18n="note_3">전투력 수치는 게임 내 표기 방식(반올림)에 따라 0.1~0.2%의 오차가 발생할 수 있습니다.</li>
+                <li data-i18n="note_3">오버로드 옵션 합산 수치는 게임 내 표기 방식(반올림)에 따라 0.1~0.2%의 오차가 발생할 수 있습니다.</li>
                 <li data-i18n="note_4">시프티패드 API 구조 변경 시 도구가 일시적으로 작동하지 않을 수 있습니다.</li>
             </ul>
         </div>
@@ -231,6 +199,14 @@
             <div class="options-group">
                 <label><input type="checkbox" id="showOverload" checked onchange="updateAllViews()"> <span data-i18n="opt_ovr">🔷 오버로드 옵션 합산 노출</span></label>
             </div>
+            <!-- 💡 [UI 패치] 빌더 화면용 언어 선택기 추가 -->
+            <div style="border-left: 1px solid #4f5b82; height: 16px;" class="desktop-only"></div>
+            <div class="options-group">
+                <span data-i18n="str_lang">🌐 언어</span>
+                <a onclick="changeLang('ko')" class="lang-btn lang-btn-ko active">KR</a>
+                <a onclick="changeLang('en')" class="lang-btn lang-btn-en">EN</a>
+                <a onclick="changeLang('ja')" class="lang-btn lang-btn-ja">JP</a>
+            </div>
         </div>
 
         <div class="capture-wrapper">
@@ -256,12 +232,12 @@
     </div>
 
     <!-- ✨ 3. 자바스크립트 (로직 제어 및 다국어 지원) -->
-/* ---------- 다국어 (i18n) 번역 사전 ---------- */
-<script>
-    const translations = {
+    <script>
+        /* ---------- 다국어 (i18n) 번역 사전 ---------- */
+        const translations = {
             "ko": {
                 "notice_title": "업데이트 안내 (2026/06/26)",
-                "notice_desc": "Lv.40 및 Lv.400 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.",
+                "notice_desc": "Lv.40(유레) 및 Lv.400 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.",
                 "intro_title": "소개",
                 "intro_desc1": "이 도구는 인게임 데이터를 바탕으로 파티 스펙 카드를 예쁘게 생성해주는 도구입니다.",
                 "intro_warn": "이 도구는 비공식 팬메이드 도구입니다. SHIFT UP 및 Level Infinite에게 이 도구에 대해 문의하지 마세요.",
@@ -274,7 +250,7 @@
                 "upload_title": "플레이어 데이터 업로드",
                 "btn_upload": "파일 선택",
                 "note_title": "주의사항",
-                "note_1": "새로운 캐릭터의 이미지가 누락되는 경우가 있을 수 있습니다.",
+                "note_1": "새로운 캐릭터의 자켓 이미지가 누락되는 경우가 있을 수 있습니다.",
                 "note_2": "미획득한 니케의 세부 장비 및 스킬 데이터는 불러올 수 없습니다.",
                 "note_3": "오버로드 옵션 합산 수치는 게임 내 표기 방식(반올림)에 따라 0.1~0.2%의 오차가 발생할 수 있습니다.",
                 "note_4": "시프티패드 API 구조 변경 시 도구가 일시적으로 작동하지 않을 수 있습니다.",
@@ -289,6 +265,7 @@
                 "opt_40": "Lv.40 기준",
                 "opt_400": "Lv.400 기준",
                 "opt_ovr": "🔷 오버로드 옵션 합산 노출",
+                "str_lang": "🌐 언어",
                 "pool_title": "내 니케 목록 (클릭하여 상단 슬롯에 편성하세요)",
                 "msg_copied": "북마크릿 코드가 복사되었습니다!\n블라블라링크 접속 후 주소창이나 개발자 도구 콘솔창에 붙여넣으세요.",
                 "msg_copy_fail": "복사에 실패했습니다. 수동으로 드래그하여 복사해주세요.",
@@ -303,7 +280,7 @@
             },
             "en": {
                 "notice_title": "Update Notice (2026/06/26)",
-                "notice_desc": "Added Lv.40 and Lv.400 CP conversion features, along with a toggle for Overload Option display.",
+                "notice_desc": "Added Lv.40 (Union Raid) and Lv.400 CP conversion features, along with a toggle for Overload Option display.",
                 "intro_title": "Introduction",
                 "intro_desc1": "This tool beautifully generates party spec cards based on your in-game data.",
                 "intro_warn": "This is an UNOFFICIAL fan-made tool. Please do not contact SHIFT UP or Level Infinite regarding this tool.",
@@ -325,13 +302,14 @@
                 "footer": "© 2026 NIKKE Spec Card Generator<br>Copyright of character portraits and game-related images belongs to the respective owners.<br>This is an unofficial site not affiliated with SHIFT UP or Level Infinite.",
                 "btn_back": "⬅️ Back to Main",
                 "btn_clear": "Clear Party",
-                "btn_download": "📸 Save Spec Card Image",
-                "opt_base": "⚔️ CP Calculation Base",
+                "btn_download": "📸 Save Spec Card",
+                "opt_base": "⚔️ CP Base",
                 "opt_sync": "Synchro/Current",
                 "opt_40": "Lv.40 Base",
                 "opt_400": "Lv.400 Base",
                 "opt_ovr": "🔷 Show Overload Options",
-                "pool_title": "My Nikke Roster (Click to assign to top slots)",
+                "str_lang": "🌐 Lang",
+                "pool_title": "My Nikke Roster (Click to assign)",
                 "msg_copied": "Bookmarklet copied!\nPaste it into your browser's address bar or Developer Console on the Blabla Link page.",
                 "msg_copy_fail": "Failed to copy. Please manually select and copy the text.",
                 "msg_invalid_json": "🚨 Invalid NIKKE Spec JSON file.",
@@ -345,7 +323,7 @@
             },
             "ja": {
                 "notice_title": "アップデート案内 (2026/06/26)",
-                "notice_desc": "Lv.40およびLv.400の戦闘力変換機能と、オバロオプションの表示切替機能を追加しました。",
+                "notice_desc": "Lv.40(ユニオンレイド)およびLv.400の戦闘力変換機能と、オバロオプションの表示切替機能を追加しました。",
                 "intro_title": "紹介",
                 "intro_desc1": "このツールは、ゲーム内データを基に綺麗なパーティースペックカードを生成するツールです。",
                 "intro_warn": "このツールは非公式のファンメイドツールです。本ツールに関してSHIFT UPやLevel Infiniteに問い合わせないでください。",
@@ -353,27 +331,28 @@
                 "how_title": "使用方法",
                 "how_desc1": "以下のブックマークレットをコピーし、<b>Blabla Link (Shifty Pad) 図鑑ページ</b>にログインして実行してください。",
                 "how_desc2": "デスクトップブラウザをご利用の場合は、開発者ツール(F12)のコンソールに入力することも可能です。",
-                "btn_copy": "ブックマークレットをコピー",
+                "btn_copy": "コードをコピー",
                 "how_desc3": "その後、抽出機で自動送信ボタンを押すか、ダウンロードしたJSONファイルをここにアップロードしてください。",
-                "upload_title": "プレイヤーデータのアップロード",
+                "upload_title": "データのアップロード",
                 "btn_upload": "ファイルを選択",
                 "note_title": "注意事項",
                 "note_1": "新キャラクターの画像が欠落している場合があります。",
                 "note_2": "未所持のニケの詳細な装備やスキルデータは読み込めません。",
                 "note_3": "オーバーロードオプションの合算数値は、ゲーム内の四捨五入の仕様により0.1～0.2%の誤差が生じる場合があります。",
                 "note_4": "Shifty PadのAPI構造が変更された場合、ツールが一時的に機能しなくなる可能性があります。",
-                "status_waiting": "データ待機中... (ブックマークレットのデータ送信またはJSONアップロードが必要です)",
-                "btn_generate": "スペックカードを生成",
+                "status_waiting": "データ待機中... (自動送信またはアップロードが必要です)",
+                "btn_generate": "カードを生成",
                 "footer": "© 2026 NIKKE Spec Card Generator<br>キャラクターのポートレートおよびゲーム関連画像の著作権は、それぞれの権利者に帰属します。<br>このサイトはSHIFT UPおよびLevel Infiniteとは一切関係のない非公式ウェブサイトです。",
                 "btn_back": "⬅️ メインに戻る",
                 "btn_clear": "パーティーリセット",
-                "btn_download": "📸 スペックカード画像を保存",
+                "btn_download": "📸 画像を保存",
                 "opt_base": "⚔️ 戦闘力の基準",
-                "opt_sync": "シンクロ/現在のLv",
+                "opt_sync": "シンクロ/現在",
                 "opt_40": "Lv.40 基準",
                 "opt_400": "Lv.400 基準",
-                "opt_ovr": "🔷 オバロオプション表示",
-                "pool_title": "マイニケリスト (クリックして上のスロットに編成)",
+                "opt_ovr": "🔷 オバロ表示",
+                "str_lang": "🌐 言語",
+                "pool_title": "マイニケリスト (クリックして編成)",
                 "msg_copied": "ブックマークレットをコピーしました！\nBlabla Linkにアクセス後、アドレスバーまたは開発者コンソールに貼り付けてください。",
                 "msg_copy_fail": "コピーに失敗しました。手動で選択してコピーしてください。",
                 "msg_invalid_json": "🚨 無効なNIKKEスペックJSONファイルです。",
@@ -387,7 +366,6 @@
             }
         };
 
-        // 💡 [핵심 추가] 게임 내 스탯/돌파 용어 다국어 번역 사전
         const termDict = {
             "명함": { "en": "LB0", "ja": "無凸" },
             "1돌": { "en": "LB1", "ja": "1凸" },
@@ -412,17 +390,15 @@
         };
 
         let currentLang = 'ko'; 
-        let charNameDB = {}; // github에서 불러올 이름 DB 변수
+        let charNameDB = {}; 
 
-        // 💡 [핵심 추가] 깃허브에서 nikke_names.json 불러오기 (비동기)
         fetch('nikke_names.json')
             .then(res => res.json())
             .then(data => { charNameDB = data; console.log("✅ 다국어 이름 DB 로드 완료"); })
-            .catch(err => console.warn("⚠️ nikke_names.json을 찾을 수 없습니다. (기본 추출 이름 사용)"));
+            .catch(err => console.warn("⚠️ nikke_names.json을 찾을 수 없습니다."));
 
         function t(key) { return translations[currentLang][key]; }
 
-        // 옵션/돌파 텍스트를 현재 언어로 치환해주는 마법의 함수
         function translateTerms(text) {
             if (currentLang === 'ko' || !text) return text;
             let result = text;
@@ -432,20 +408,21 @@
             return result;
         }
 
-// 캐릭터 한국어 이름을 보고 DB에서 번역된 이름을 꺼내오는 함수
         function getCharName(code, fallbackName) {
             if (currentLang === 'ko') return fallbackName;
-            // 💡 [수정됨] code(ID) 대신 fallbackName(한국어 이름)을 Key로 사용하여 검색!
             if (charNameDB[fallbackName] && charNameDB[fallbackName][currentLang]) {
                 return charNameDB[fallbackName][currentLang];
             }
-            return fallbackName; // DB에 없으면 그냥 한국어 출력
+            return fallbackName; 
         }
 
+        // 💡 [핵심 패치] 언어 변경 시 랜딩 페이지와 빌더 페이지 양쪽 버튼 모두 업데이트
         function changeLang(lang) {
             currentLang = lang;
-            document.querySelectorAll('.lang-selector a').forEach(el => el.classList.remove('active'));
-            document.getElementById(`lang-${lang}`).classList.add('active');
+            
+            // 모든 lang-btn에서 active 제거 후, 선택된 언어의 버튼에만 active 추가
+            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`.lang-btn-${lang}`).forEach(el => el.classList.add('active'));
 
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -456,8 +433,10 @@
                 activateLandingState(pendingData);
                 document.getElementById('serverInfo').innerText = `${t('str_server')}: ${pendingData.server} | ${t('str_sync')}: Lv.${pendingData.synchroLevel}`;
             }
-            // 언어가 바뀔 때마다 카드를 다시 그려서 번역 적용!
-            updateAllViews();
+            // 스펙 빌더 화면이 켜져있다면 카드를 다시 그림
+            if(document.getElementById('builder-view').style.display !== 'none') {
+                updateAllViews();
+            }
         }
 
         let allCharacters = [];
@@ -570,7 +549,6 @@
                     slot.className = 'slot filled';
                     const imgUrl = `images/${char.code}.webp`;
                     
-                    // 💡 [번역 적용] 이름, 돌파, 오버옵션을 현재 언어로 변환!
                     const dispName = getCharName(char.code, char.name);
                     const dispBreak = translateTerms(char.break);
                     let ovrText = char.overload !== '-' ? char.overload : t('str_no_ovr');
@@ -620,8 +598,6 @@
                 if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
 
                 const imgUrl = `images/${char.code}.webp`;
-                
-                // 💡 [번역 적용] 하단 리스트의 이름도 번역
                 const dispName = getCharName(char.code, char.name);
                 
                 item.innerHTML = `
@@ -660,6 +636,7 @@
             });
         });
         
+        // 초기 언어 설정 (한국어)
         changeLang('ko');
     </script>
 </body>
