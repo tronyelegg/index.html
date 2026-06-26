@@ -9,7 +9,7 @@
             const modal = document.createElement('div');
             Object.assign(modal.style, { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', width: '90%', maxWidth: '340px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'sans-serif', color: '#333', textAlign: 'center' });
             const title = document.createElement('div');
-            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor v16.8</span><br><span style="font-size:11px;color:#666;">Multi-CP Data Engine</span>';
+            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor </span><br><span style="font-size:11px;color:#666;">Multi-CP Data Engine</span>';
             title.style.borderBottom = '1px solid #eee'; title.style.paddingBottom = '10px';
             const status = document.createElement('div');
             status.id = 'nikke-status-text'; status.innerText = '서버 통신 중...';
