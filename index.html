@@ -233,11 +233,11 @@
 
     <!-- ✨ 3. 자바스크립트 (로직 제어 및 다국어 지원) -->
     <script>
-        /* ---------- 다국어 (i18n) 번역 사전 ---------- */
+/* ---------- 다국어 (i18n) 번역 사전 ---------- */
         const translations = {
             "ko": {
                 "notice_title": "업데이트 안내 (2026/06/26)",
-                "notice_desc": "Lv.40(유레) 및 Lv.400 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.",
+                "notice_desc": "Lv.40(협동작전) 및 Lv.400(솔로 레이드) 전투력 변환 기능과 오버로드 옵션 분리 표기 기능이 새롭게 추가되었습니다.",
                 "intro_title": "소개",
                 "intro_desc1": "이 도구는 인게임 데이터를 바탕으로 파티 스펙 카드를 예쁘게 생성해주는 도구입니다.",
                 "intro_warn": "이 도구는 비공식 팬메이드 도구입니다. SHIFT UP 및 Level Infinite에게 이 도구에 대해 문의하지 마세요.",
@@ -250,9 +250,9 @@
                 "upload_title": "플레이어 데이터 업로드",
                 "btn_upload": "파일 선택",
                 "note_title": "주의사항",
-                "note_1": "새로운 캐릭터의 자켓 이미지가 누락되는 경우가 있을 수 있습니다.",
+                "note_1": "새로운 캐릭터의 이미지가 누락되는 경우가 있을 수 있습니다.",
                 "note_2": "미획득한 니케의 세부 장비 및 스킬 데이터는 불러올 수 없습니다.",
-                "note_3": "오버로드 옵션 합산 수치는 게임 내 표기 방식(반올림)에 따라 0.1~0.2%의 오차가 발생할 수 있습니다.",
+                "note_3": "전투력 수치는 게임 내 연산 방식(반올림)에 따라 약간의 오차가 발생할 수 있습니다.",
                 "note_4": "시프티패드 API 구조 변경 시 도구가 일시적으로 작동하지 않을 수 있습니다.",
                 "status_waiting": "데이터 대기 중... (북마크릿 전송 또는 파일 업로드 필요)",
                 "btn_generate": "스펙 카드 생성",
@@ -280,7 +280,7 @@
             },
             "en": {
                 "notice_title": "Update Notice (2026/06/26)",
-                "notice_desc": "Added Lv.40 (Union Raid) and Lv.400 CP conversion features, along with a toggle for Overload Option display.",
+                "notice_desc": "Added Lv.40 (Co-op) and Lv.400 (Solo Raid) CP conversion features, along with a toggle for Overload Option display.",
                 "intro_title": "Introduction",
                 "intro_desc1": "This tool beautifully generates party spec cards based on your in-game data.",
                 "intro_warn": "This is an UNOFFICIAL fan-made tool. Please do not contact SHIFT UP or Level Infinite regarding this tool.",
@@ -293,9 +293,9 @@
                 "upload_title": "Upload Player Data",
                 "btn_upload": "Choose File",
                 "note_title": "Important Notes",
-                "note_1": "Portraits for newly released characters might be missing.",
+                "note_1": "Images for newly released characters might be missing.",
                 "note_2": "Detailed equipment and skill data for unobtained Nikkes cannot be loaded.",
-                "note_3": "Overload option sums may have a 0.1~0.2% error margin due to in-game rounding rules.",
+                "note_3": "Combat Power (CP) may have a slight error margin due to in-game rounding rules.",
                 "note_4": "The tool may temporarily break if the Shifty Pad API structure changes.",
                 "status_waiting": "Waiting for data... (Requires bookmarklet data or file upload)",
                 "btn_generate": "Generate Spec Card",
@@ -323,7 +323,7 @@
             },
             "ja": {
                 "notice_title": "アップデート案内 (2026/06/26)",
-                "notice_desc": "Lv.40(ユニオンレイド)およびLv.400の戦闘力変換機能と、オバロオプションの表示切替機能を追加しました。",
+                "notice_desc": "Lv.40(協同作戦)およびLv.400(ソロレイド)の戦闘力変換機能と、オバロオプションの表示切替機能を追加しました。",
                 "intro_title": "紹介",
                 "intro_desc1": "このツールは、ゲーム内データを基に綺麗なパーティースペックカードを生成するツールです。",
                 "intro_warn": "このツールは非公式のファンメイドツールです。本ツールに関してSHIFT UPやLevel Infiniteに問い合わせないでください。",
@@ -338,7 +338,7 @@
                 "note_title": "注意事項",
                 "note_1": "新キャラクターの画像が欠落している場合があります。",
                 "note_2": "未所持のニケの詳細な装備やスキルデータは読み込めません。",
-                "note_3": "オーバーロードオプションの合算数値は、ゲーム内の四捨五入の仕様により0.1～0.2%の誤差が生じる場合があります。",
+                "note_3": "戦闘力は、ゲーム内の四捨五入の仕様により若干の誤差が生じる場合があります。",
                 "note_4": "Shifty PadのAPI構造が変更された場合、ツールが一時的に機能しなくなる可能性があります。",
                 "status_waiting": "データ待機中... (自動送信またはアップロードが必要です)",
                 "btn_generate": "カードを生成",
@@ -365,276 +365,6 @@
                 "str_loaded": "のデータ読み込み完了！"
             }
         };
-
-        const termDict = {
-            "명함": { "en": "LB0", "ja": "無凸" },
-            "1돌": { "en": "LB1", "ja": "1凸" },
-            "2돌": { "en": "LB2", "ja": "2凸" },
-            "풀돌": { "en": "MLB", "ja": "3凸" },
-            "1코강": { "en": "Core 1", "ja": "コア1" },
-            "2코강": { "en": "Core 2", "ja": "コア2" },
-            "3코강": { "en": "Core 3", "ja": "コア3" },
-            "4코강": { "en": "Core 4", "ja": "コア4" },
-            "5코강": { "en": "Core 5", "ja": "コア5" },
-            "6코강": { "en": "Core 6", "ja": "コア6" },
-            "풀코": { "en": "Max Core", "ja": "完凸" },
-            "우코": { "en": "Ele", "ja": "有利" },
-            "공증": { "en": "ATK", "ja": "攻撃" },
-            "장탄": { "en": "Ammo", "ja": "装弾" },
-            "명중": { "en": "Hit", "ja": "命中" },
-            "차댐": { "en": "ChgDmg", "ja": "チャダメ" },
-            "차속": { "en": "ChgSpd", "ja": "チャ速" },
-            "크확": { "en": "CritRt", "ja": "クリ率" },
-            "크뎀": { "en": "CritDmg", "ja": "クリダメ" },
-            "방증": { "en": "DEF", "ja": "防御" }
-        };
-
-        let currentLang = 'ko'; 
-        let charNameDB = {}; 
-
-        fetch('nikke_names.json')
-            .then(res => res.json())
-            .then(data => { charNameDB = data; console.log("✅ 다국어 이름 DB 로드 완료"); })
-            .catch(err => console.warn("⚠️ nikke_names.json을 찾을 수 없습니다."));
-
-        function t(key) { return translations[currentLang][key]; }
-
-        function translateTerms(text) {
-            if (currentLang === 'ko' || !text) return text;
-            let result = text;
-            for (const [koTerm, trans] of Object.entries(termDict)) {
-                result = result.replace(new RegExp(koTerm, 'g'), trans[currentLang] || koTerm);
-            }
-            return result;
-        }
-
-        function getCharName(code, fallbackName) {
-            if (currentLang === 'ko') return fallbackName;
-            if (charNameDB[fallbackName] && charNameDB[fallbackName][currentLang]) {
-                return charNameDB[fallbackName][currentLang];
-            }
-            return fallbackName; 
-        }
-
-        // 💡 [핵심 패치] 언어 변경 시 랜딩 페이지와 빌더 페이지 양쪽 버튼 모두 업데이트
-        function changeLang(lang) {
-            currentLang = lang;
-            
-            // 모든 lang-btn에서 active 제거 후, 선택된 언어의 버튼에만 active 추가
-            document.querySelectorAll('.lang-btn').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll(`.lang-btn-${lang}`).forEach(el => el.classList.add('active'));
-
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[lang][key]) { el.innerHTML = translations[lang][key]; }
-            });
-
-            if (pendingData) {
-                activateLandingState(pendingData);
-                document.getElementById('serverInfo').innerText = `${t('str_server')}: ${pendingData.server} | ${t('str_sync')}: Lv.${pendingData.synchroLevel}`;
-            }
-            // 스펙 빌더 화면이 켜져있다면 카드를 다시 그림
-            if(document.getElementById('builder-view').style.display !== 'none') {
-                updateAllViews();
-            }
-        }
-
-        let allCharacters = [];
-        let selectedCharacters = [];
-        let pendingData = null; 
-
-        /* ---------- 랜딩 페이지 로직 ---------- */
-        function copyCode() {
-            const code = document.getElementById('bookmarkletCode').innerText;
-            navigator.clipboard.writeText(code).then(() => { alert(t('msg_copied')); })
-            .catch(err => { alert(t('msg_copy_fail')); });
-        }
-
-        function activateLandingState(data) {
-            pendingData = data;
-            const statusBox = document.getElementById('dataStatus');
-            statusBox.innerHTML = `✅ <b>${data.playerName}</b>${t('str_loaded')}<br><span style="font-size:12px; font-weight:normal;">(${t('str_server')}: ${data.server} | ${t('str_sync')}: Lv.${data.synchroLevel} | ${t('str_collected')}: ${data.characters.length})</span>`;
-            statusBox.classList.add('active');
-
-            const genBtn = document.getElementById('generateBtn');
-            genBtn.disabled = false;
-            genBtn.classList.add('active');
-            
-            if(document.getElementById('landing-view').style.display !== 'none') {
-                document.getElementById('generateBtn').click(); 
-            }
-        }
-
-        document.getElementById('landingJsonUpload').addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (data && data.characters) { activateLandingState(data); } 
-                    else { alert(t('msg_invalid_json')); }
-                } catch (error) { alert(t('msg_read_error')); }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        });
-
-        window.addEventListener('message', (event) => {
-            if (event.data && event.data.type === 'NIKKE_SPEC_DATA') { activateLandingState(event.data.payload); }
-        });
-
-        document.getElementById('generateBtn').addEventListener('click', () => {
-            if (!pendingData) return;
-            document.getElementById('landing-view').style.display = 'none';
-            document.getElementById('builder-view').style.display = 'flex';
-            window.scrollTo(0, 0); 
-            
-            document.getElementById('playerName').innerText = pendingData.playerName;
-            document.getElementById('serverInfo').innerText = `${t('str_server')}: ${pendingData.server} | ${t('str_sync')}: Lv.${pendingData.synchroLevel}`;
-            const now = new Date();
-            document.getElementById('timeStamp').innerText = `Generated by NIKKE Spec Builder | ${now.toLocaleString()}`;
-
-            allCharacters = pendingData.characters;
-            selectedCharacters = allCharacters.slice(0, 5); 
-            updateAllViews();
-            setTimeout(adjustScale, 100);
-        });
-
-        document.getElementById('backBtn').addEventListener('click', () => {
-            document.getElementById('builder-view').style.display = 'none';
-            document.getElementById('landing-view').style.display = 'flex';
-        });
-
-        /* ---------- 스펙 빌더 로직 ---------- */
-        function adjustScale() {
-            const wrapper = document.querySelector('.capture-wrapper');
-            const area = document.getElementById('capture-area');
-            const wWidth = wrapper.clientWidth;
-            if (wWidth < 1000) {
-                const s = wWidth / 1000;
-                area.style.transform = `scale(${s})`;
-                area.style.transformOrigin = 'top left';
-                wrapper.style.height = `${area.offsetHeight * s}px`;
-            } else {
-                area.style.transform = 'none';
-                wrapper.style.height = 'auto';
-            }
-        }
-        window.addEventListener('resize', adjustScale);
-
-        function updateAllViews() {
-            renderSlots();
-            renderGrid();
-        }
-
-        function renderSlots() {
-            const container = document.getElementById('slotsContainer');
-            container.innerHTML = '';
-            let partyCp = 0;
-
-            const cpMode = document.querySelector('input[name="cpDisplay"]:checked').value;
-            const isOvrVisible = document.getElementById('showOverload').checked;
-
-            for (let i = 0; i < 5; i++) {
-                const char = selectedCharacters[i];
-                const slot = document.createElement('div');
-                
-                if (char) {
-                    let targetCp = char.cp;
-                    if (cpMode === 'lv40') targetCp = char.cp40 || char.cp;
-                    if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
-
-                    partyCp += targetCp;
-                    slot.className = 'slot filled';
-                    const imgUrl = `images/${char.code}.webp`;
-                    
-                    const dispName = getCharName(char.code, char.name);
-                    const dispBreak = translateTerms(char.break);
-                    let ovrText = char.overload !== '-' ? char.overload : t('str_no_ovr');
-                    const dispOvr = translateTerms(ovrText);
-                    
-                    slot.innerHTML = `
-                        <div class="slot-img" style="background-image: url('${imgUrl}');"></div>
-                        <div class="slot-content">
-                            <div class="slot-top">
-                                <div class="slot-badge">${dispBreak}</div>
-                                <div class="slot-name">${dispName}</div>
-                            </div>
-                            <div class="slot-bottom">
-                                <div class="slot-cp">${targetCp.toLocaleString()}</div>
-                                <div class="slot-stats">S: ${char.skill} | E: ${char.equip}</div>
-                                <div class="slot-ovr" style="display: ${isOvrVisible ? 'block' : 'none'};">${dispOvr}</div>
-                            </div>
-                        </div>
-                    `;
-                    slot.onclick = () => removeChar(char);
-                } else {
-                    slot.className = 'slot';
-                    slot.innerHTML = `<div class="empty-icon">+</div>`;
-                }
-                container.appendChild(slot);
-            }
-            document.getElementById('totalCp').innerText = partyCp.toLocaleString();
-            document.getElementById('downloadBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
-            document.getElementById('clearBtn').style.display = selectedCharacters.length > 0 ? 'block' : 'none';
-            setTimeout(adjustScale, 50);
-        }
-
-        function renderGrid() {
-            const grid = document.getElementById('charGrid');
-            if (allCharacters.length === 0) return;
-            grid.innerHTML = '';
-
-            const cpMode = document.querySelector('input[name="cpDisplay"]:checked').value;
-
-            allCharacters.forEach(char => {
-                const isSelected = selectedCharacters.includes(char);
-                const item = document.createElement('div');
-                item.className = `grid-item ${isSelected ? 'selected' : ''}`;
-                
-                let targetCp = char.cp;
-                if (cpMode === 'lv40') targetCp = char.cp40 || char.cp;
-                if (cpMode === 'lv400') targetCp = char.cp400 || char.cp;
-
-                const imgUrl = `images/${char.code}.webp`;
-                const dispName = getCharName(char.code, char.name);
-                
-                item.innerHTML = `
-                    <div class="grid-img" style="background-image: url('${imgUrl}');"></div>
-                    <div class="grid-content">
-                        <div class="grid-name">${dispName}</div>
-                        <div class="grid-cp">⚔️ ${targetCp.toLocaleString()}</div>
-                    </div>
-                `;
-                if (!isSelected) { item.onclick = () => addChar(char); }
-                grid.appendChild(item);
-            });
-        }
-
-        function addChar(char) {
-            if (selectedCharacters.length < 5) { selectedCharacters.push(char); renderSlots(); renderGrid(); } 
-            else { alert(t('msg_max_party')); }
-        }
-        function removeChar(char) { selectedCharacters = selectedCharacters.filter(c => c !== char); renderSlots(); renderGrid(); }
-
-        document.getElementById('clearBtn').onclick = () => { selectedCharacters = []; renderSlots(); renderGrid(); };
-
-        document.getElementById('downloadBtn').addEventListener('click', () => {
-            const captureTarget = document.getElementById('capture-area');
-            const wrapper = document.querySelector('.capture-wrapper');
-            
-            captureTarget.style.transform = 'none';
-            wrapper.style.height = 'auto';
-
-            html2canvas(captureTarget, { backgroundColor: '#12151f', scale: 2, scrollX: 0, scrollY: 0 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `NIKKE_Party_${document.getElementById('playerName').innerText}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                adjustScale();
-            });
-        });
         
         // 초기 언어 설정 (한국어)
         changeLang('ko');
