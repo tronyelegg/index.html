@@ -1,23 +1,36 @@
 (async function() {
     if(document.getElementById('nikke-dashboard-modal-overlay')) return;
     
+    // 💡 [UI 업데이트] T.RONY 다크 테크웨어 & 해커 콘솔 테마 적용 완료
     const ui = {
         create: function() {
             const overlay = document.createElement('div');
             overlay.id = 'nikke-dashboard-modal-overlay';
-            Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.8)', zIndex: '2147483647', display: 'flex', justifyContent: 'center', alignItems: 'center' });
+            Object.assign(overlay.style, { position: 'fixed', top: '0', left: '0', width: '100%', height: '100%', backgroundColor: 'rgba(0,0,0,0.75)', zIndex: '2147483647', display: 'flex', justifyContent: 'center', alignItems: 'center', backdropFilter: 'blur(3px)', fontFamily: "'Noto Sans KR', sans-serif, 'Segoe UI'" });
+            
             const modal = document.createElement('div');
-            Object.assign(modal.style, { backgroundColor: '#fff', borderRadius: '8px', padding: '20px', width: '90%', maxWidth: '340px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', fontFamily: 'sans-serif', color: '#333', textAlign: 'center' });
+            Object.assign(modal.style, { backgroundColor: '#12151f', border: '2px solid #00E676', borderRadius: '12px', padding: '25px', width: '90%', maxWidth: '340px', boxShadow: '0 0 30px rgba(0, 230, 118, 0.2)', color: '#fff', textAlign: 'center' });
+            
             const title = document.createElement('div');
-            title.innerHTML = '<span style="font-size:16px;font-weight:bold;">NIKKE Spec Extractor </span><br><span style="font-size:11px;color:#666;">Multi-CP Data Engine</span>';
-            title.style.borderBottom = '1px solid #eee'; title.style.paddingBottom = '10px';
+            title.innerHTML = `
+                <div style="font-family: monospace, Consolas, 'Courier New'; font-weight: 900; font-size: 42px; letter-spacing: -2px; color: #00E676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.4); margin: 0; line-height: 1;">T.RONY</div>
+                <div style="color: #4FC3F7; font-size: 11px; font-weight: bold; letter-spacing: 1px; margin-top: 6px;">Total Record Of Nikke Yearbook</div>
+            `;
+            title.style.borderBottom = '1px solid #2e344e'; 
+            title.style.paddingBottom = '15px';
+            title.style.marginBottom = '20px';
+            
             const status = document.createElement('div');
             status.id = 'nikke-status-text'; status.innerText = '서버 통신 중...';
-            status.style.fontSize = '14px'; status.style.margin = '20px 0'; status.style.fontWeight = 'bold';
+            Object.assign(status.style, { fontSize: '14px', margin: '20px 0', fontWeight: 'bold', color: '#00E676' });
+            
             const closeBtn = document.createElement('button');
             closeBtn.id = 'nikke-close-btn'; closeBtn.innerText = '닫기';
-            Object.assign(closeBtn.style, { padding: '8px 20px', backgroundColor: '#999', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px', display: 'none', margin: '10px auto 0 auto' });
+            Object.assign(closeBtn.style, { padding: '10px 30px', backgroundColor: '#4f5b82', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', display: 'none', margin: '10px auto 0 auto', transition: '0.2s' });
+            closeBtn.onmouseover = () => closeBtn.style.backgroundColor = '#6876a3';
+            closeBtn.onmouseout = () => closeBtn.style.backgroundColor = '#4f5b82';
             closeBtn.onclick = () => overlay.remove();
+            
             modal.appendChild(title); modal.appendChild(status); modal.appendChild(closeBtn);
             overlay.appendChild(modal); document.body.appendChild(overlay);
         },
@@ -29,11 +42,11 @@
             const el = document.getElementById('nikke-status-text');
             if (!el) return;
             el.innerHTML = `
-                <span style="color:#009688; font-size:15px; font-weight:bold;">✅ 데이터 추출 완벽 성공!</span><br>
-                <span style="font-size:12px; color:#666; display:block; margin:10px 0 15px 0;">원하시는 작업을 선택해주세요.</span>
-                <button id="btn-web" style="width:100%; padding:14px; margin-bottom:10px; background-color:#3F51B5; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">🚀 1. 스펙 빌더로 자동 전송</button>
-                <button id="btn-json" style="width:100%; padding:14px; margin-bottom:10px; background-color:#009688; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">🔒 2. JSON 저장 후 사이트로 이동</button>
-                <button id="btn-excel" style="width:100%; padding:14px; margin-bottom:5px; background-color:#2E7D32; color:white; border:none; border-radius:6px; font-size:14px; font-weight:bold; cursor:pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);">📊 3. 엑셀(EXCEL) 파일로 저장</button>
+                <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #00E676;">✅ 데이터 추출 완벽 성공!</div>
+                <div style="font-size: 13px; color: #a6accd; margin-bottom: 20px;">원하시는 작업을 선택해주세요.</div>
+                <button id="btn-web" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #3F51B5; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">🚀 1. 스펙 빌더로 자동 전송</button>
+                <button id="btn-json" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #00897B; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">🔒 2. JSON 저장 후 사이트로 이동</button>
+                <button id="btn-excel" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 15px; background: #2E7D32; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">📊 3. 엑셀(EXCEL) 파일로 저장</button>
             `;
             document.getElementById('btn-web').onclick = () => {
                 const newWin = window.open("https://tronyelegg.github.io/index.html", "_blank");
@@ -43,14 +56,14 @@
             document.getElementById('btn-json').onclick = () => {
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                a.download = `NIKKE_Data_${nickname}.json`; a.click();
+                a.download = `TRONY_Data_${nickname}.json`; a.click();
                 URL.revokeObjectURL(a.href);
                 setTimeout(() => window.open("https://tronyelegg.github.io/index.html", "_blank"), 500);
             };
             document.getElementById('btn-excel').onclick = () => {
                 const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                a.download = `NIKKE_CP_Dashboard_${nickname}.xlsx`; a.click();
+                a.download = `TRONY_Dashboard_${nickname}.xlsx`; a.click();
                 URL.revokeObjectURL(a.href);
             };
             const closeBtn = document.getElementById('nikke-close-btn');
