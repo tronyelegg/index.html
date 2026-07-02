@@ -1,7 +1,69 @@
 (async function() {
     if(document.getElementById('nikke-dashboard-modal-overlay')) return;
+
+    // 💡 [업데이트] 다국어(i18n) 지원: 브라우저 언어 자동 감지
+    const langCode = (navigator.language || navigator.userLanguage || 'ko').substring(0, 2);
+    const lang = ['ko', 'en', 'ja'].includes(langCode) ? langCode : 'en';
+
+    const i18n = {
+        'ko': {
+            statusInit: '서버 통신 중...',
+            btnClose: '닫기',
+            successTitle: '✅ 데이터 추출 완벽 성공!',
+            successDesc: '원하시는 작업을 선택해주세요.',
+            btnWeb: '🚀 1. 스펙 빌더로 자동 전송',
+            btnJson: '🔒 2. JSON 저장 후 사이트로 이동',
+            btnExcel: '📊 3. 엑셀(EXCEL) 파일로 저장',
+            msgBlocked: '🚨 팝업 차단이 감지되었습니다.',
+            msgFindOpenId: 'OpenID를 자동으로 찾는 중...',
+            msgNoOpenId: '🚨 비공개 계정이거나 OpenID를 찾을 수 없습니다.',
+            msgScanServer: '서버 정보를 스캔 중입니다...',
+            msgNoServer: '🚨 서버 정보를 찾지 못했습니다.\n계정 설정을 확인해주세요.',
+            msgSyncDB: '게임 데이터베이스 동기화 중...',
+            msgCreateExcel: '엑셀 파일 양식을 생성 중입니다...',
+            msgCalcCP: '개별 전투력을 정밀 연산 중입니다...',
+            msgNoExcelLib: '🚨 오류: 엑셀 라이브러리를 불러오지 못했습니다.'
+        },
+        'en': {
+            statusInit: 'Communicating with server...',
+            btnClose: 'Close',
+            successTitle: '✅ Data Extraction Successful!',
+            successDesc: 'Please select an action below.',
+            btnWeb: '🚀 1. Auto-send to Spec Builder',
+            btnJson: '🔒 2. Save JSON & Go to Site',
+            btnExcel: '📊 3. Save as Excel file',
+            msgBlocked: '🚨 Popup blocker detected.',
+            msgFindOpenId: 'Automatically finding OpenID...',
+            msgNoOpenId: '🚨 Private account or OpenID not found.',
+            msgScanServer: 'Scanning server info...',
+            msgNoServer: '🚨 Server info not found.\nPlease check account settings.',
+            msgSyncDB: 'Synchronizing game database...',
+            msgCreateExcel: 'Generating Excel template...',
+            msgCalcCP: 'Calculating precise Combat Power...',
+            msgNoExcelLib: '🚨 Error: Failed to load Excel library.'
+        },
+        'ja': {
+            statusInit: 'サーバー通信中...',
+            btnClose: '閉じる',
+            successTitle: '✅ データ抽出完了！',
+            successDesc: '希望する操作を選択してください。',
+            btnWeb: '🚀 1. スペックビルダーへ自動送信',
+            btnJson: '🔒 2. JSON保存後にサイトへ移動',
+            btnExcel: '📊 3. Excelファイルとして保存',
+            msgBlocked: '🚨 ポップアップブロックを検出しました。',
+            msgFindOpenId: 'OpenIDを自動検索中...',
+            msgNoOpenId: '🚨 非公開アカウント、またはOpenIDが見つかりません。',
+            msgScanServer: 'サーバー情報をスキャン中...',
+            msgNoServer: '🚨 サーバー情報が見つかりません。\nアカウント設定を確認してください。',
+            msgSyncDB: 'ゲームデータベースを同期中...',
+            msgCreateExcel: 'Excelファイルの書式を作成中...',
+            msgCalcCP: '個別戦闘力を精密計算中...',
+            msgNoExcelLib: '🚨 エラー：Excelライブラリを読み込めませんでした。'
+        }
+    };
+    const t = (key) => i18n[lang][key];
     
-    // 💡 [UI 업데이트] T.RONY 다크 테크웨어 & 해커 콘솔 테마 적용 완료
+    // 💡 [업데이트] T.RONY 다크 테크웨어 테마 (폰트 변경 및 약어 제거)
     const ui = {
         create: function() {
             const overlay = document.createElement('div');
@@ -12,20 +74,20 @@
             Object.assign(modal.style, { backgroundColor: '#12151f', border: '2px solid #00E676', borderRadius: '12px', padding: '25px', width: '90%', maxWidth: '340px', boxShadow: '0 0 30px rgba(0, 230, 118, 0.2)', color: '#fff', textAlign: 'center' });
             
             const title = document.createElement('div');
+            // 💡 폰트 변경 (Consolas, Menlo) 및 부제목(Total Record...) 완벽 삭제
             title.innerHTML = `
-                <div style="font-family: monospace, Consolas, 'Courier New'; font-weight: 900; font-size: 42px; letter-spacing: -2px; color: #00E676; text-shadow: 0 0 15px rgba(0, 230, 118, 0.4); margin: 0; line-height: 1;">T.RONY</div>
-                <div style="color: #4FC3F7; font-size: 11px; font-weight: bold; letter-spacing: 1px; margin-top: 6px;">Total Record Of Nikke Yearbook</div>
+                <h1 style="font-family: 'Consolas', 'Menlo', 'Monaco', monospace; font-weight: 900; font-size: 46px; letter-spacing: 2px; margin: 0; color: #00E676; text-shadow: 0 0 10px rgba(0, 230, 118, 0.7), 0 0 20px rgba(0, 230, 118, 0.4);">T.RONY</h1>
             `;
             title.style.borderBottom = '1px solid #2e344e'; 
             title.style.paddingBottom = '15px';
             title.style.marginBottom = '20px';
             
             const status = document.createElement('div');
-            status.id = 'nikke-status-text'; status.innerText = '서버 통신 중...';
-            Object.assign(status.style, { fontSize: '14px', margin: '20px 0', fontWeight: 'bold', color: '#00E676' });
+            status.id = 'nikke-status-text'; status.innerText = t('statusInit');
+            Object.assign(status.style, { fontSize: '14px', margin: '20px 0', fontWeight: 'bold', color: '#00E676', wordBreak: 'keep-all' });
             
             const closeBtn = document.createElement('button');
-            closeBtn.id = 'nikke-close-btn'; closeBtn.innerText = '닫기';
+            closeBtn.id = 'nikke-close-btn'; closeBtn.innerText = t('btnClose');
             Object.assign(closeBtn.style, { padding: '10px 30px', backgroundColor: '#4f5b82', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '14px', display: 'none', margin: '10px auto 0 auto', transition: '0.2s' });
             closeBtn.onmouseover = () => closeBtn.style.backgroundColor = '#6876a3';
             closeBtn.onmouseout = () => closeBtn.style.backgroundColor = '#4f5b82';
@@ -42,16 +104,16 @@
             const el = document.getElementById('nikke-status-text');
             if (!el) return;
             el.innerHTML = `
-                <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #00E676;">✅ 데이터 추출 완벽 성공!</div>
-                <div style="font-size: 13px; color: #a6accd; margin-bottom: 20px;">원하시는 작업을 선택해주세요.</div>
-                <button id="btn-web" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #3F51B5; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">🚀 1. 스펙 빌더로 자동 전송</button>
-                <button id="btn-json" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #00897B; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">🔒 2. JSON 저장 후 사이트로 이동</button>
-                <button id="btn-excel" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 15px; background: #2E7D32; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">📊 3. 엑셀(EXCEL) 파일로 저장</button>
+                <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #00E676;">${t('successTitle')}</div>
+                <div style="font-size: 13px; color: #a6accd; margin-bottom: 20px;">${t('successDesc')}</div>
+                <button id="btn-web" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #3F51B5; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnWeb')}</button>
+                <button id="btn-json" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #00897B; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnJson')}</button>
+                <button id="btn-excel" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 15px; background: #2E7D32; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnExcel')}</button>
             `;
             document.getElementById('btn-web').onclick = () => {
                 const newWin = window.open("https://tronyelegg.github.io/index.html", "_blank");
                 if (newWin) { setTimeout(() => { newWin.postMessage({ type: 'NIKKE_SPEC_DATA', payload: payload }, "*"); }, 2500); } 
-                else { alert("팝업 차단이 감지되었습니다."); }
+                else { alert(t('msgBlocked')); }
             };
             document.getElementById('btn-json').onclick = () => {
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -107,11 +169,11 @@
     }
 
     async function runMainLogic() {
-        ui.update("OpenID를 자동으로 찾는 중...");
+        ui.update(t('msgFindOpenId'));
         let targetId = await huntOpenIdAutomated();
-        if (!targetId) { ui.update("🚨 비공개 계정이거나 OpenID를 찾을 수 없습니다."); return; }
+        if (!targetId) { ui.update(t('msgNoOpenId')); return; }
         
-        ui.update("서버 정보를 스캔 중입니다...");
+        ui.update(t('msgScanServer'));
         let areaId = null;
         for (const ta of [81, 82, 83, 84, 85, 86]) {
             try {
@@ -120,10 +182,10 @@
                 if (data.code === 0) { areaId = ta; break; }
             } catch (e) {}
         }
-        if (!areaId) { ui.update("🚨 서버 정보를 찾지 못했습니다.\n계정 설정을 확인해주세요."); return; }
+        if (!areaId) { ui.update(t('msgNoServer')); return; }
         const regionCodeMap = { 81: "JP", 82: "NA", 83: "KR", 84: "Global", 85: "SEA", 86: "TW" };
 
-        ui.update("게임 데이터베이스 동기화 중...");
+        ui.update(t('msgSyncDB'));
         const ts = Date.now();
         const [resChars, resMainDB, resGrowthDB, resAff, resEquip, resCube, resColR, resColSR, resOutpost, resBasic] = await Promise.all([
             fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacters", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: areaId }), credentials: "include" }),
@@ -174,7 +236,7 @@
         const optValMap = { "13": commonV, "12": commonV, "11": { "01": "2.30%", "02": "2.64%", "03": "2.98%", "04": "3.32%", "05": "3.66%", "06": "4.00%", "07": "4.35%", "08": "4.69%", "09": "5.03%", "10": "5.37%", "11": "5.70%", "12": "6.05%", "13": "6.39%", "14": "6.73%", "15": "7.07%" }, "10": { "01": "1.98%", "02": "2.28%", "03": "2.57%", "04": "2.86%", "05": "3.16%", "06": "3.45%", "07": "3.75%", "08": "4.04%", "09": "4.33%", "10": "4.63%", "11": "4.92%", "12": "5.21%", "13": "5.51%", "14": "5.80%", "15": "6.09%" }, "09": commonV, "08": commonV, "07": { "01": "27.84%", "02": "31.95%", "03": "36.06%", "04": "40.17%", "05": "44.28%", "06": "48.39%", "07": "52.50%", "08": "56.60%", "09": "60.71%", "10": "64.82%", "11": "68.93%", "12": "73.04%", "13": "77.15%", "14": "81.26%", "15": "85.37%" }, "06": commonV, "05": { "01": "9.54%", "02": "10.94%", "03": "12.34%", "04": "13.75%", "05": "15.15%", "06": "16.55%", "07": "17.95%", "08": "19.35%", "09": "20.75%", "10": "22.15%", "11": "23.56%", "12": "24.96%", "13": "26.36%", "14": "27.76%", "15": "29.16%" } };
         const shortOpt = { "05": "우코", "06": "명중", "07": "장탄", "08": "공증", "09": "차댐", "10": "차속", "11": "크확", "12": "크뎀", "13": "방증" };
 
-        ui.update("엑셀 파일 양식을 생성 중입니다...");
+        ui.update(t('msgCreateExcel'));
         const workbook = new ExcelJS.Workbook();
         const wsCalc = workbook.addWorksheet("🔮 실시간 스펙 검색기");
         const wsMyData = workbook.addWorksheet("✨ 내 니케 데이터", { views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }] });
@@ -191,7 +253,7 @@
         }
         wsMyData.getRow(1).eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3F51B5' } }; c.font = { color: { argb: 'FFFFFFFF' }, bold: true }; c.alignment = { horizontal: 'center' }; });
 
-        ui.update("개별 전투력을 정밀 연산 중입니다...");
+        ui.update(t('msgCalcCP'));
         const synLevel = outpostData?.synchro_level || 1;
         let extracted = [];
         
@@ -298,7 +360,6 @@
                             
                             wsMyData.addRow([cName, lvStatusStr, brkStr, favStr, skStr, eqStr, ovrDisp, aLv, getCp(40), getCp(synLevel), getCp(400)]);
                             
-                            // 💡 [핵심 업데이트] 프론트웹에서 레벨별 토글을 지원하기 위해 cp40과 cp400을 패일로드에 추가하여 발송합니다!
                             extracted.push({ 
                                 code: cId, 
                                 name: cName, 
@@ -337,7 +398,7 @@
             await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js');
             runMainLogic();
         } catch (e) {
-            ui.update("🚨 오류: 엑셀 라이브러리를 불러오지 못했습니다.");
+            ui.update(t('msgNoExcelLib'));
         }
     }
     startProcess();
