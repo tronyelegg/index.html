@@ -29,6 +29,15 @@
 
         .section-block { display: flex; flex-direction: column; align-items: center; text-align: center; }
         .section-title { font-size: 20px; font-weight: bold; color: #fff; margin-top: 0; margin-bottom: 15px; }
+        
+        /* 💡 가이드 링크 버튼 스타일 추가 */
+        .guide-link {
+            display: inline-block; background-color: #1e2233; border: 1px solid #4FC3F7; color: #4FC3F7;
+            padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;
+            margin-bottom: 20px; transition: 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .guide-link:hover { background-color: #4FC3F7; color: #000; transform: translateY(-2px); }
+
         .desc-text { font-size: 14px; margin-bottom: 10px; word-break: keep-all; }
         .warning-red { color: #FF5252; font-weight: bold; margin: 15px 0; }
         .code-box { background-color: #0f111a; border: 1px dashed #8892b0; border-radius: 6px; padding: 15px; font-family: monospace; font-size: 13px; color: #fff; word-break: break-all; width: 100%; box-sizing: border-box; text-align: left; margin: 15px 0; }
@@ -137,6 +146,10 @@
 
         <div class="section-block">
             <h2 class="section-title" data-i18n="how_title">사용 방법</h2>
+            
+            <!-- 💡 유저 가이드 링크 버튼 추가 -->
+            <a href="https://github.com/tronyelegg/index.html/blob/main/USER_GUIDE.md" target="_blank" class="guide-link" data-i18n="how_guide_link">📖 간편 사용 가이드 보러가기</a>
+
             <div class="desc-text" data-i18n="how_desc1">아래의 북마크릿을 복사하여 <b>블라블라링크(시프티패드) 도감 페이지</b>에 로그인한 후 실행해주세요.</div>
             <div class="desc-text" data-i18n="how_desc2">데스크톱 브라우저를 사용하고 계시다면, 개발자 도구(F12)의 콘솔창에 입력하셔도 됩니다.</div>
             
@@ -241,6 +254,7 @@
                 "intro_warn": "이 도구는 비공식 팬메이드 도구입니다. SHIFT UP 및 Level Infinite에게 이 도구에 대해 문의하지 마세요.",
                 "intro_desc2": "이 사이트는 어떠한 개인정보도 서버로 수집하지 않으며, 모든 처리는 브라우저 내에서만 이루어집니다.",
                 "how_title": "사용 방법",
+                "how_guide_link": "📖 간편 사용 가이드 보러가기",
                 "how_desc1": "아래의 북마크릿을 복사하여 <b>블라블라링크(시프티패드) 도감 페이지</b>에 로그인한 후 실행해주세요.",
                 "how_desc2": "데스크톱 브라우저를 사용하고 계시다면, 개발자 도구(F12)의 콘솔창에 입력하셔도 됩니다.",
                 "btn_copy": "북마크릿 복사",
@@ -284,6 +298,7 @@
                 "intro_warn": "This is an UNOFFICIAL fan-made tool. Please do not contact SHIFT UP or Level Infinite regarding this tool.",
                 "intro_desc2": "This site does not collect any personal data. All processing is done locally within your browser.",
                 "how_title": "How to Use",
+                "how_guide_link": "📖 View Simple User Guide",
                 "how_desc1": "Copy the bookmarklet below, log in to the <b>Blabla Link (Shifty Pad) Nikkepedia page</b>, and execute it.",
                 "how_desc2": "If using a desktop browser, you can paste it into the Developer Tools (F12) console.",
                 "btn_copy": "Copy Bookmarklet",
@@ -327,6 +342,7 @@
                 "intro_warn": "このツールは非公式のファンメイドツールです。本ツールに関してSHIFT UPやLevel Infiniteに問い合わせないでください。",
                 "intro_desc2": "このサイトはいかなる個人情報もサーバーに収集せず、すべての処理はブラウザ内で完結します。",
                 "how_title": "使用方法",
+                "how_guide_link": "📖 簡単な使用ガイドを見る",
                 "how_desc1": "以下のブックマークレットをコピーし、<b>Blabla Link (Shifty Pad) 図鑑ページ</b>にログインして実行してください。",
                 "how_desc2": "デスクトップブラウザをご利用の場合は、開発者ツール(F12)のコンソールに入力することも可能です。",
                 "btn_copy": "コードをコピー",
