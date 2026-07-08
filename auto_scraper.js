@@ -36,10 +36,18 @@ const IMAGES_DIR = path.join(__dirname, 'images');
         dbNames.sort((a, b) => b.clean.length - a.clean.length);
 
         console.log("🕵️‍♂️ 2. 가상 브라우저(Puppeteer)를 열고 도감 사이트에 접속합니다...");
-        const browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        
+        // 💡 [핵심 패치 1] 브라우저 자체의 실행 언어를 한국어로 강제 설정
+        const browser = await puppeteer.launch({ 
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=ko-KR'] 
+        });
         const page = await browser.newPage();
         
-        // 화면 크기를 넉넉하게 잡아줍니다
+        // 💡 [핵심 패치 2] 웹사이트에 보내는 HTTP 요청 헤더를 한국어로 위장
+        await page.setExtraHTTPHeaders({
+            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8'
+        });
+        
         await page.setViewport({ width: 1280, height: 1080 });
         await page.goto('https://www.blablalink.com/shiftyspad/nikke-list', { waitUntil: 'networkidle2' });
         
@@ -59,7 +67,7 @@ const IMAGES_DIR = path.join(__dirname, 'images');
                 }, 150);
             });
         });
-        await new Promise(r => setTimeout(r, 2000)); // 스크롤 후 추가 대기
+        await new Promise(r => setTimeout(r, 2000));
 
         const scrapedData = await page.evaluate(() => {
             const items = document.querySelectorAll('.nikkes-player-item, .nikkes-all-item, div[data-cname="player-item"], div[data-cname="all-item"]');
@@ -81,11 +89,11 @@ const IMAGES_DIR = path.join(__dirname, 'images');
         console.log(`✅ 총 ${scrapedData.length}개의 니케 DOM 데이터를 읽어왔습니다. 매칭 시작...`);
 
         let uploadCount = 0;
-        let missedNames = new Set(); // 매칭 실패한 텍스트 저장용
+        let missedNames = new Set(); 
 
         for (const item of scrapedData) {
             const cleanUiText = item.text.replace(/[^가-힣a-zA-Z0-9]/g, '');
-            if (!cleanUiText) continue; // 빈 텍스트 무시
+            if (!cleanUiText) continue;
 
             let charName = null;
             let charCode = null;
@@ -98,7 +106,6 @@ const IMAGES_DIR = path.join(__dirname, 'images');
                 }
             }
 
-            // 💡 [디버그 추가] 매칭에 실패하면 로그를 남깁니다.
             if (!charCode) {
                 missedNames.add(cleanUiText);
                 continue;
@@ -123,7 +130,6 @@ const IMAGES_DIR = path.join(__dirname, 'images');
             }
         }
 
-        // 매칭 실패 로그 출력
         if (missedNames.size > 0) {
             console.log("\n⚠️ [디버그] DB와 이름 매칭에 실패한 항목들 (Gist DB 업데이트 필요):");
             missedNames.forEach(name => console.log(` - ${name}`));
