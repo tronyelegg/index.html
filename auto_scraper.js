@@ -37,15 +37,29 @@ const IMAGES_DIR = path.join(__dirname, 'images');
 
         console.log("🕵️‍♂️ 2. 가상 브라우저(Puppeteer)를 열고 도감 사이트에 접속합니다...");
         
-        // 💡 [핵심 패치 1] 브라우저 자체의 실행 언어를 한국어로 강제 설정
         const browser = await puppeteer.launch({ 
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=ko-KR'] 
         });
         const page = await browser.newPage();
         
-        // 💡 [핵심 패치 2] 웹사이트에 보내는 HTTP 요청 헤더를 한국어로 위장
+        // HTTP 헤더 변조
         await page.setExtraHTTPHeaders({
             'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8'
+        });
+
+        // 💡 [핵심 패치 3] 페이지가 로드되기 직전에 브라우저의 JS 엔진을 한국어로 완벽하게 세뇌시킵니다.
+        await page.evaluateOnNewDocument(() => {
+            Object.defineProperty(navigator, "language", {
+                get: function() { return "ko-KR"; }
+            });
+            Object.defineProperty(navigator, "languages", {
+                get: function() { return ["ko-KR", "ko"]; }
+            });
+            // 로컬 스토리지에 영어 캐시가 남아있을 경우를 대비해 한국어(ko)를 강제 주입
+            localStorage.setItem('lang', 'ko');
+            localStorage.setItem('locale', 'ko');
+            localStorage.setItem('language', 'ko');
+            document.cookie = "NEXT_LOCALE=ko; path=/";
         });
         
         await page.setViewport({ width: 1280, height: 1080 });
@@ -92,6 +106,7 @@ const IMAGES_DIR = path.join(__dirname, 'images');
         let missedNames = new Set(); 
 
         for (const item of scrapedData) {
+            // 이번엔 무조건 한글로 넘어올 테니, 한글/숫자/영어 필터링 유지
             const cleanUiText = item.text.replace(/[^가-힣a-zA-Z0-9]/g, '');
             if (!cleanUiText) continue;
 
