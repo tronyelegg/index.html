@@ -4,14 +4,12 @@ const path = require('path');
 
 const GIST_ID = 'aa065a2c885931e6676cbc7d5a00f51c';
 const IMAGES_DIR = path.join(__dirname, 'images');
+const DICT_PATH = path.join(__dirname, 'nikke_names.json'); // 💡 사전 파일 경로 추가
 
 (async () => {
-    console.log("🚀 [T.RONY 자동 스캐너] 백그라운드 봇 가동 시작...");
+    console.log("🚀 [T.RONY 자동 스캐너] 완전 무인화 봇 가동 시작...");
 
-    if (!fs.existsSync(IMAGES_DIR)) {
-        fs.mkdirSync(IMAGES_DIR, { recursive: true });
-    }
-
+    if (!fs.existsSync(IMAGES_DIR)) fs.mkdirSync(IMAGES_DIR, { recursive: true });
     const existingFiles = new Set(fs.readdirSync(IMAGES_DIR));
 
     try {
@@ -35,120 +33,126 @@ const IMAGES_DIR = path.join(__dirname, 'images');
         dbNames.push({ original: '아크레인저 블랙', clean: '블랙', code: '5174' });
         dbNames.sort((a, b) => b.clean.length - a.clean.length);
 
-        console.log("🕵️‍♂️ 2. 가상 브라우저(Puppeteer)를 열고 도감 사이트에 접속합니다...");
-        
         const browser = await puppeteer.launch({ 
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--lang=ko-KR,ko'] 
-        });
-        const page = await browser.newPage();
-        
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
-        
-        await page.setExtraHTTPHeaders({
-            'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8'
+            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
         });
 
-        // 💡 [결정적 패치] 유저님이 발견하신 "진짜" 언어 쿠키 강제 이식!!
-        await page.setCookie(
-            { name: '__ss_storage_cookie_cache_lang__', value: 'ko', domain: 'www.blablalink.com', path: '/' },
-            { name: '__ss_storage_cookie_cache_lang__', value: 'ko', domain: '.blablalink.com', path: '/' }
-        );
-        
-        await page.setViewport({ width: 1280, height: 1080 });
-        
-        // 올바른 원래 주소로 접속
-        await page.goto('https://www.blablalink.com/shiftyspad/nikke-list', { waitUntil: 'networkidle2' });
+        // 💡 [핵심] 언어별로 사이트를 돌며 데이터를 긁어오는 공통 함수
+        const scrapeLanguage = async (langCode) => {
+            console.log(`\n🕵️‍♂️ [${langCode.toUpperCase()}] 언어 모드로 도감 스캔을 시작합니다...`);
+            const page = await browser.newPage();
+            await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+            
+            await page.setExtraHTTPHeaders({ 'Accept-Language': `${langCode},en-US;q=0.9` });
+            await page.setCookie(
+                { name: '__ss_storage_cookie_cache_lang__', value: langCode, domain: 'www.blablalink.com', path: '/' },
+                { name: '__ss_storage_cookie_cache_lang__', value: langCode, domain: '.blablalink.com', path: '/' }
+            );
+            
+            await page.setViewport({ width: 1280, height: 1080 });
+            await page.goto('https://www.blablalink.com/shiftyspad/nikke-list', { waitUntil: 'networkidle2' });
 
-        // 페이지 접속 후 한 번 더 LocalStorage에 확실하게 쐐기 박기
-        await page.evaluate(() => {
-            localStorage.setItem('__ss_storage_cookie_cache_lang__', 'ko');
-            localStorage.setItem('__ss_storage_ls_cache_local_saved_regions__', '["ko"]');
-        });
-        
-        console.log("⏳ 지연 로딩(Lazy Loading) 방지를 위해 페이지를 스크롤합니다...");
-        await page.evaluate(async () => {
-            await new Promise((resolve) => {
-                let totalHeight = 0;
-                const distance = 300;
-                const timer = setInterval(() => {
-                    const scrollHeight = document.body.scrollHeight;
-                    window.scrollBy(0, distance);
-                    totalHeight += distance;
-                    if(totalHeight >= scrollHeight - window.innerHeight){
-                        clearInterval(timer);
-                        resolve();
+            await page.evaluate((l) => {
+                localStorage.setItem('__ss_storage_cookie_cache_lang__', l);
+                localStorage.setItem('__ss_storage_ls_cache_local_saved_regions__', `["${l}"]`);
+            }, langCode);
+            await page.reload({ waitUntil: 'networkidle2' });
+            
+            // 페이지 스크롤 (지연 로딩 해제)
+            await page.evaluate(async () => {
+                await new Promise((resolve) => {
+                    let totalHeight = 0; const distance = 300;
+                    const timer = setInterval(() => {
+                        window.scrollBy(0, distance); totalHeight += distance;
+                        if(totalHeight >= document.body.scrollHeight - window.innerHeight){ clearInterval(timer); resolve(); }
+                    }, 150);
+                });
+            });
+            await new Promise(r => setTimeout(r, 2000));
+
+            const data = await page.evaluate(() => {
+                const items = document.querySelectorAll('.nikkes-player-item, .nikkes-all-item, div[data-cname="player-item"], div[data-cname="all-item"]');
+                const res = [];
+                items.forEach(item => {
+                    const imgEl = item.querySelector('img');
+                    if (!imgEl) return;
+                    let imgSrc = imgEl.src;
+                    if (!imgSrc || imgSrc.includes('data:image') || imgSrc.includes('empty')) {
+                        imgSrc = imgEl.dataset.src || imgEl.getAttribute('data-src') || imgSrc;
                     }
-                }, 150);
+                    // textContent를 써서 ... 으로 생략된 긴 이름도 원본 그대로 가져옴
+                    res.push({ img: imgSrc, text: item.textContent || "" });
+                });
+                return res;
             });
-        });
-        await new Promise(r => setTimeout(r, 2000));
-
-        const scrapedData = await page.evaluate(() => {
-            const items = document.querySelectorAll('.nikkes-player-item, .nikkes-all-item, div[data-cname="player-item"], div[data-cname="all-item"]');
-            const data = [];
-            items.forEach(item => {
-                const imgEl = item.querySelector('img');
-                if (!imgEl) return;
-                const rawText = item.textContent || item.innerText || "";
-                let imgSrc = imgEl.src;
-                if (!imgSrc || imgSrc.includes('data:image') || imgSrc.includes('empty')) {
-                    imgSrc = imgEl.dataset.src || imgEl.getAttribute('data-src') || imgSrc;
-                }
-                data.push({ text: rawText, img: imgSrc });
-            });
+            await page.close();
             return data;
-        });
+        };
 
+        // 💡 한/영/일 3개국어 순회 스크래핑!
+        const koData = await scrapeLanguage('ko');
+        const enData = await scrapeLanguage('en');
+        const jaData = await scrapeLanguage('ja');
         await browser.close();
-        console.log(`✅ 총 ${scrapedData.length}개의 니케 DOM 데이터를 읽어왔습니다. 매칭 시작...`);
 
+        console.log(`\n✅ 다국어 스캔 완료 (KO: ${koData.length}명, EN: ${enData.length}명, JA: ${jaData.length}명)`);
+
+        // 텍스트에서 'LV. 120', '⚔ 123,456' 같은 잡음(노이즈)을 제거하는 청소기 함수
+        const cleanNameText = (rawText) => {
+            return rawText.replace(/LV\.\s*\d+/i, '').replace(/⚔\s*[\d,]+/g, '').trim();
+        };
+
+        // 이미지 주소(imgUrl)를 열쇠로 삼아 3개 국어 데이터를 하나로 합체
+        const mergedMap = {};
+        koData.forEach(k => mergedMap[k.img] = { ko: k.text });
+        enData.forEach(e => { if (mergedMap[e.img]) mergedMap[e.img].en = cleanNameText(e.text); });
+        jaData.forEach(j => { if (mergedMap[j.img]) mergedMap[j.img].ja = cleanNameText(j.text); });
+
+        const dictionary = {};
         let uploadCount = 0;
-        let missedNames = new Set(); 
 
-        for (const item of scrapedData) {
-            const cleanUiText = item.text.replace(/[^가-힣a-zA-Z0-9]/g, '');
-            if (!cleanUiText) continue;
+        console.log("\n⚙️ 데이터 분석 및 사전(Dictionary) 편찬 시작...");
+        for (const imgUrl in mergedMap) {
+            const entry = mergedMap[imgUrl];
+            if (!entry.ko) continue;
 
-            let charName = null;
+            const cleanKoText = cleanNameText(entry.ko).replace(/[^가-힣a-zA-Z0-9]/g, '');
+            let officialName = null;
             let charCode = null;
 
             for (const db of dbNames) {
-                if (cleanUiText.endsWith(db.clean)) {
-                    charName = db.original;
+                if (cleanKoText.endsWith(db.clean)) {
+                    officialName = db.original;
                     charCode = db.code;
                     break;
                 }
             }
 
-            if (!charCode) {
-                missedNames.add(cleanUiText);
-                continue;
+            if (!officialName || !charCode) continue;
+
+            // 1. 번역 사전에 자동 등재
+            if (entry.en && entry.ja) {
+                dictionary[officialName] = { en: entry.en, ja: entry.ja };
             }
 
+            // 2. 신규 이미지 다운로드 로직
             const fileName = `${charCode}.webp`;
-            
-            if (existingFiles.has(fileName)) continue;
-
-            console.log(`[발견!] ✨ 신규 니케: ${charName} (${fileName}) - 다운로드 시작...`);
-            
-            try {
-                const imgRes = await fetch(item.img);
-                const arrayBuffer = await imgRes.arrayBuffer();
-                const buffer = Buffer.from(arrayBuffer);
-                
-                fs.writeFileSync(path.join(IMAGES_DIR, fileName), buffer);
-                console.log(`✅ 저장 완료: ${fileName}`);
-                uploadCount++;
-            } catch (e) {
-                console.error(`❌ 이미지 다운로드 실패 (${charName}):`, e);
+            if (!existingFiles.has(fileName)) {
+                console.log(`[발견!] ✨ 신규 니케: ${officialName} (${fileName}) - 다운로드 시작...`);
+                try {
+                    const imgRes = await fetch(imgUrl);
+                    const buffer = Buffer.from(await imgRes.arrayBuffer());
+                    fs.writeFileSync(path.join(IMAGES_DIR, fileName), buffer);
+                    uploadCount++;
+                } catch (e) {
+                    console.error(`❌ 이미지 다운로드 실패 (${officialName}):`, e);
+                }
             }
         }
 
-        if (missedNames.size > 0) {
-            console.log("\n⚠️ [디버그] DB와 이름 매칭에 실패한 항목들 (Gist DB 업데이트 필요):");
-            missedNames.forEach(name => console.log(` - ${name}`));
-            console.log("--------------------------------------------------\n");
-        }
+        // 완성된 사전을 nikke_names.json 파일로 덮어쓰기
+        fs.writeFileSync(DICT_PATH, JSON.stringify(dictionary, null, 4));
+        console.log(`✅ [성공] 총 ${Object.keys(dictionary).length}명의 다국어 번역 사전 생성 및 저장 완료!`);
 
         if (uploadCount > 0) {
             console.log(`🎉 임무 완료! 총 ${uploadCount}개의 신규 이미지를 로컬에 저장했습니다.`);
