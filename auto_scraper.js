@@ -4,7 +4,7 @@ const path = require('path');
 
 const GIST_ID = 'aa065a2c885931e6676cbc7d5a00f51c';
 const IMAGES_DIR = path.join(__dirname, 'images');
-const DICT_PATH = path.join(__dirname, 'nikke_names.json'); // 💡 사전 파일 경로 추가
+const DICT_PATH = path.join(__dirname, 'nikke_names.json');
 
 (async () => {
     console.log("🚀 [T.RONY 자동 스캐너] 완전 무인화 봇 가동 시작...");
@@ -33,28 +33,39 @@ const DICT_PATH = path.join(__dirname, 'nikke_names.json'); // 💡 사전 파�
         dbNames.push({ original: '아크레인저 블랙', clean: '블랙', code: '5174' });
         dbNames.sort((a, b) => b.clean.length - a.clean.length);
 
-        const browser = await puppeteer.launch({ 
-            args: ['--no-sandbox', '--disable-setuid-sandbox'] 
-        });
-
-        // 💡 [핵심] 언어별로 사이트를 돌며 데이터를 긁어오는 공통 함수
+        // 💡 [핵심 패치] 언어를 바꿀 때마다 '완전히 새로운 브라우저'를 켰다 끕니다.
         const scrapeLanguage = async (langCode) => {
-            console.log(`\n🕵️‍♂️ [${langCode.toUpperCase()}] 언어 모드로 도감 스캔을 시작합니다...`);
+            const langFull = langCode === 'ko' ? 'ko-KR' : (langCode === 'ja' ? 'ja-JP' : 'en-US');
+            console.log(`\n🕵️‍♂️ [${langCode.toUpperCase()}] 언어 모드로 백지 상태의 새 브라우저를 엽니다...`);
+            
+            const browser = await puppeteer.launch({ 
+                args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+            });
             const page = await browser.newPage();
+
             await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36');
+            await page.setExtraHTTPHeaders({ 'Accept-Language': `${langFull},${langCode};q=0.9` });
             
-            await page.setExtraHTTPHeaders({ 'Accept-Language': `${langCode},en-US;q=0.9` });
-            await page.setCookie(
-                { name: '__ss_storage_cookie_cache_lang__', value: langCode, domain: 'www.blablalink.com', path: '/' },
-                { name: '__ss_storage_cookie_cache_lang__', value: langCode, domain: '.blablalink.com', path: '/' }
-            );
-            
+            // 접속 전 완벽한 언어 세뇌
+            await page.evaluateOnNewDocument((l, lf) => {
+                Object.defineProperty(navigator, "language", { get: function() { return lf; } });
+                Object.defineProperty(navigator, "languages", { get: function() { return [lf, l]; } });
+                localStorage.setItem('__ss_storage_cookie_cache_lang__', l);
+                localStorage.setItem('__ss_storage_ls_cache_local_saved_regions__', `["${l}"]`);
+                localStorage.setItem('lang', l);
+                localStorage.setItem('locale', l);
+                document.cookie = `NEXT_LOCALE=${l}; path=/; max-age=31536000`;
+                document.cookie = `__ss_storage_cookie_cache_lang__=${l}; domain=.blablalink.com; path=/; max-age=31536000`;
+            }, langCode, langFull);
+
             await page.setViewport({ width: 1280, height: 1080 });
             await page.goto('https://www.blablalink.com/shiftyspad/nikke-list', { waitUntil: 'networkidle2' });
 
+            // 접속 후 한 번 더 쐐기 박고 강력 새로고침
             await page.evaluate((l) => {
                 localStorage.setItem('__ss_storage_cookie_cache_lang__', l);
                 localStorage.setItem('__ss_storage_ls_cache_local_saved_regions__', `["${l}"]`);
+                document.cookie = `__ss_storage_cookie_cache_lang__=${l}; domain=.blablalink.com; path=/; max-age=31536000`;
             }, langCode);
             await page.reload({ waitUntil: 'networkidle2' });
             
@@ -80,24 +91,24 @@ const DICT_PATH = path.join(__dirname, 'nikke_names.json'); // 💡 사전 파�
                     if (!imgSrc || imgSrc.includes('data:image') || imgSrc.includes('empty')) {
                         imgSrc = imgEl.dataset.src || imgEl.getAttribute('data-src') || imgSrc;
                     }
-                    // textContent를 써서 ... 으로 생략된 긴 이름도 원본 그대로 가져옴
                     res.push({ img: imgSrc, text: item.textContent || "" });
                 });
                 return res;
             });
-            await page.close();
+            
+            // 💡 볼일이 끝난 브라우저는 완전히 종료 (캐시 오염 방지)
+            await browser.close();
             return data;
         };
 
-        // 💡 한/영/일 3개국어 순회 스크래핑!
+        // 💡 각각 독립된 브라우저 환경에서 스크래핑
         const koData = await scrapeLanguage('ko');
         const enData = await scrapeLanguage('en');
         const jaData = await scrapeLanguage('ja');
-        await browser.close();
 
         console.log(`\n✅ 다국어 스캔 완료 (KO: ${koData.length}명, EN: ${enData.length}명, JA: ${jaData.length}명)`);
 
-        // 텍스트에서 'LV. 120', '⚔ 123,456' 같은 잡음(노이즈)을 제거하는 청소기 함수
+        // 텍스트에서 'LV. 120', '⚔ 123,456' 같은 잡음을 제거하는 함수
         const cleanNameText = (rawText) => {
             return rawText.replace(/LV\.\s*\d+/i, '').replace(/⚔\s*[\d,]+/g, '').trim();
         };
