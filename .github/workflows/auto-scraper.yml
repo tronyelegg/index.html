@@ -1,0 +1,37 @@
+name: T.RONY Auto Image Scraper
+
+on:
+  schedule:
+    # 매일 한국 시간 기준 밤 12시 (UTC 시간으로는 15:00)에 자동 실행
+    - cron: '0 15 * * *'
+  workflow_dispatch: # 레포지토리 Actions 탭에서 수동으로 버튼을 눌러 실행할 수 있게 해줌
+
+permissions:
+  contents: write # 봇이 레포지토리에 파일을 푸시할 수 있는 권한
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 레포지토리 코드 가져오기
+        uses: actions/checkout@v3
+
+      - name: ⚙️ Node.js 환경 세팅
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 필요 라이브러리(Puppeteer) 설치
+        run: npm install puppeteer
+
+      - name: 🤖 T.RONY 자동 스캐너 스크립트 실행
+        run: node auto_scraper.js
+
+      - name: 💾 새 이미지가 있으면 Github에 자동 커밋 및 푸시
+        run: |
+          git config --global user.name "TRONY-Bot"
+          git config --global user.email "trony-bot@users.noreply.github.com"
+          git add images/
+          # 변경사항이 있는지 확인하고, 있으면 커밋 후 푸시 (없으면 무시)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [T.RONY] 신규 캐릭터 초상화 자동 업데이트" && git push)
