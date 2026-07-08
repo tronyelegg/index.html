@@ -35,10 +35,3 @@ jobs:
           git add images/
           # 변경사항이 있는지 확인하고, 있으면 커밋 후 푸시 (없으면 무시)
           git diff --quiet && git diff --staged --quiet || (git commit -m "🤖 [T.RONY] 신규 캐릭터 초상화 자동 업데이트" && git push)
-
-      - name: 🔍 디버그용 스크린샷 업로드
-        uses: actions/upload-artifact@v4
-        if: always() # 에러가 나도 무조건 사진을 올리도록 설정
-        with:
-          name: debug-screenshot
-          path: debug_screenshot.png
