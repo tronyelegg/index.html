@@ -82,6 +82,9 @@ const IMAGES_DIR = path.join(__dirname, 'images');
             });
         });
         await new Promise(r => setTimeout(r, 2000));
+        
+        console.log("📸 [디버그] 현재 화면 상태를 스크린샷으로 찍습니다...");
+        await page.screenshot({ path: 'debug_screenshot.png', fullPage: true });
 
         const scrapedData = await page.evaluate(() => {
             const items = document.querySelectorAll('.nikkes-player-item, .nikkes-all-item, div[data-cname="player-item"], div[data-cname="all-item"]');
