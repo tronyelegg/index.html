@@ -1,7 +1,7 @@
 (async function() {
     if(document.getElementById('nikke-dashboard-modal-overlay')) return;
 
-    // 💡 [업데이트] 다국어(i18n) 지원: 브라우저 언어 자동 감지
+    // 💡 [アップデート] 多言語(i18n)対応: ブラウザ言語の自動検知
     const langCode = (navigator.language || navigator.userLanguage || 'ko').substring(0, 2);
     const lang = ['ko', 'en', 'ja'].includes(langCode) ? langCode : 'en';
 
@@ -63,7 +63,7 @@
     };
     const t = (key) => i18n[lang][key];
     
-    // 💡 [업데이트] T.RONY 다크 테크웨어 테마 (폰트 변경 및 약어 제거)
+    // 💡 [アップデート] T.RONY ダークテックウェアテーマ (フォント変更および略語削除)
     const ui = {
         create: function() {
             const overlay = document.createElement('div');
@@ -74,7 +74,6 @@
             Object.assign(modal.style, { backgroundColor: '#12151f', border: '2px solid #00E676', borderRadius: '12px', padding: '25px', width: '90%', maxWidth: '340px', boxShadow: '0 0 30px rgba(0, 230, 118, 0.2)', color: '#fff', textAlign: 'center' });
             
             const title = document.createElement('div');
-            // 💡 폰트 변경 (Consolas, Menlo) 및 부제목(Total Record...) 완벽 삭제
             title.innerHTML = `
                 <h1 style="font-family: 'Consolas', 'Menlo', 'Monaco', monospace; font-weight: 900; font-size: 46px; letter-spacing: 2px; margin: 0; color: #00E676; text-shadow: 0 0 10px rgba(0, 230, 118, 0.7), 0 0 20px rgba(0, 230, 118, 0.4);">T.RONY</h1>
             `;
@@ -175,13 +174,55 @@
         
         ui.update(t('msgScanServer'));
         let areaId = null;
-        for (const ta of [81, 82, 83, 84, 85, 86]) {
+
+        // 💡 [修正箇所] 現在選択中のサーバー(area_id)を正確に取得するロジック
+        let currentUid = null;
+        const uidMatch = document.cookie.match(/game_uid=(\d+)/);
+        if (uidMatch) currentUid = uidMatch[1];
+
+        // 1. LocalStorageから現在のロール情報を取得
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.includes('current_role_info') || key.includes('login_meta')) {
+                    const val = localStorage.getItem(key);
+                    if (val && val.includes('area_id')) {
+                        const parsed = JSON.parse(val);
+                        if (parsed.area_id && (!currentUid || String(parsed.role_id) === currentUid || String(parsed.uid) === currentUid)) {
+                            areaId = parsed.area_id;
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch(e) {}
+
+        // 2. APIを通じてロールリストを取得し、CookieのUIDと照合
+        if (!areaId && currentUid) {
             try {
-                const res = await fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: ta, name_codes: [5167] }), credentials: "include" });
-                const data = await res.json();
-                if (data.code === 0) { areaId = ta; break; }
+                const roleRes = await fetch("https://api.blablalink.com/api/ugc/proxy/standalonesite/User/GetGameRoleList", { 
+                    method: "POST", headers: { "Content-Type": "application/json" }, 
+                    body: JSON.stringify({ game_id: 29080, game_channelid: 131 }), credentials: "include" 
+                });
+                const roleData = await roleRes.json();
+                if (roleData?.data?.list) {
+                    const activeRole = roleData.data.list.find(r => String(r.role_id) === currentUid || String(r.uid) === currentUid);
+                    if (activeRole) areaId = activeRole.area_id;
+                }
             } catch (e) {}
         }
+
+        // 3. 最終手段：既存のループ（総当たり）
+        if (!areaId) {
+            for (const ta of [81, 82, 83, 84, 85, 86]) {
+                try {
+                    const res = await fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: ta, name_codes: [5167] }), credentials: "include" });
+                    const data = await res.json();
+                    if (data.code === 0) { areaId = ta; break; }
+                } catch (e) {}
+            }
+        }
+
         if (!areaId) { ui.update(t('msgNoServer')); return; }
         const regionCodeMap = { 81: "JP", 82: "NA", 83: "KR", 84: "Global", 85: "SEA", 86: "TW" };
 
@@ -211,13 +252,13 @@
         const cubeData = await resCube.json(); const colRData = await resColR.json();
         const colSRData = await resColSR.json(); const outpostData = (await resOutpost.json()).data?.outpost_info;
 
-        let finalNickname = "지휘관";
+        let finalNickname = "指揮官";
         try {
             const bInfoStr = await resBasic.text();
             const nickMatch = bInfoStr.match(/"nickname"\s*:\s*"([^"]+)"/);
             if (nickMatch) finalNickname = nickMatch[1];
         } catch (e) {}
-        if (finalNickname === "지휘관") {
+        if (finalNickname === "指揮官") {
             const domName = document.querySelector('.user-name') || document.querySelector('.name');
             if (domName) finalNickname = domName.innerText.trim();
         }
@@ -234,21 +275,21 @@
 
         const commonV = { "01": "4.77%", "02": "5.47%", "03": "6.18%", "04": "6.88%", "05": "7.59%", "06": "8.29%", "07": "9.00%", "08": "9.70%", "09": "10.40%", "10": "11.11%", "11": "11.81%", "12": "12.52%", "13": "13.22%", "14": "13.93%", "15": "14.63%" };
         const optValMap = { "13": commonV, "12": commonV, "11": { "01": "2.30%", "02": "2.64%", "03": "2.98%", "04": "3.32%", "05": "3.66%", "06": "4.00%", "07": "4.35%", "08": "4.69%", "09": "5.03%", "10": "5.37%", "11": "5.70%", "12": "6.05%", "13": "6.39%", "14": "6.73%", "15": "7.07%" }, "10": { "01": "1.98%", "02": "2.28%", "03": "2.57%", "04": "2.86%", "05": "3.16%", "06": "3.45%", "07": "3.75%", "08": "4.04%", "09": "4.33%", "10": "4.63%", "11": "4.92%", "12": "5.21%", "13": "5.51%", "14": "5.80%", "15": "6.09%" }, "09": commonV, "08": commonV, "07": { "01": "27.84%", "02": "31.95%", "03": "36.06%", "04": "40.17%", "05": "44.28%", "06": "48.39%", "07": "52.50%", "08": "56.60%", "09": "60.71%", "10": "64.82%", "11": "68.93%", "12": "73.04%", "13": "77.15%", "14": "81.26%", "15": "85.37%" }, "06": commonV, "05": { "01": "9.54%", "02": "10.94%", "03": "12.34%", "04": "13.75%", "05": "15.15%", "06": "16.55%", "07": "17.95%", "08": "19.35%", "09": "20.75%", "10": "22.15%", "11": "23.56%", "12": "24.96%", "13": "26.36%", "14": "27.76%", "15": "29.16%" } };
-        const shortOpt = { "05": "우코", "06": "명중", "07": "장탄", "08": "공증", "09": "차댐", "10": "차속", "11": "크확", "12": "크뎀", "13": "방증" };
+        const shortOpt = { "05": "ウコ", "06": "命中", "07": "装弾", "08": "攻増", "09": "チャダメ", "10": "チャ速", "11": "クリ率", "12": "クリダメ", "13": "防増" };
 
         ui.update(t('msgCreateExcel'));
         const workbook = new ExcelJS.Workbook();
-        const wsCalc = workbook.addWorksheet("🔮 실시간 스펙 검색기");
-        const wsMyData = workbook.addWorksheet("✨ 내 니케 데이터", { views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }] });
-        wsMyData.addRow(['캐릭터 이름', '레벨', '돌파/코강', '소장품/애장품', '스킬 레벨', '장비 레벨', '오버옵션 합산', '호감도', '⚔️ Lv.40 전투력', '⚔️ 현재 싱크로 전투력', '⚔️ Lv.400 전투력']);
+        const wsCalc = workbook.addWorksheet("🔮 リアルタイムスペック検索");
+        const wsMyData = workbook.addWorksheet("✨ マイニケデータ", { views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }] });
+        wsMyData.addRow(['キャラクター名', 'レベル', '限界突破/コア強化', '所持品/愛蔵品', 'スキルレベル', '装備レベル', 'オバロオプション合算', '好感度', '⚔️ Lv.40 戦闘力', '⚔️ 現在シンクロ戦闘力', '⚔️ Lv.400 戦闘力']);
         wsMyData.autoFilter = 'A1:K1';
-        wsCalc.columns = [{ header: '니케 선택 🔍 (클릭)', width: 25 }, { header: '레벨', width: 10 }, { header: '돌파 현황', width: 15 }, { header: '소장품/애장품', width: 20 }, { header: '스킬 레벨', width: 15 }, { header: '장비 레벨', width: 15 }, { header: '오버옵션 합산', width: 35 }, { header: '호감도', width: 10 }, { header: 'Lv.40 전투력', width: 15 }, { header: '싱크로 전투력', width: 15 }, { header: 'Lv.400 전투력', width: 15 }];
+        wsCalc.columns = [{ header: 'ニケ選択 🔍 (クリック)', width: 25 }, { header: 'レベル', width: 10 }, { header: '突破状況', width: 15 }, { header: '所持品/愛蔵品', width: 20 }, { header: 'スキルレベル', width: 15 }, { header: '装備レベル', width: 15 }, { header: 'オバロオプション合算', width: 35 }, { header: '好感度', width: 10 }, { header: 'Lv.40 戦闘力', width: 15 }, { header: 'シンクロ戦闘力', width: 15 }, { header: 'Lv.400 戦闘力', width: 15 }];
         
         wsCalc.getRow(1).eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE91E63' } }; c.font = { color: { argb: 'FFFFFFFF' }, bold: true }; c.alignment = { horizontal: 'center' }; });
         for (let rowNum = 2; rowNum <= 15; rowNum++) {
-            const r = wsCalc.addRow(['(니케 이름을 선택하세요)', '', '', '', '', '', '', '', '', '', '']);
-            r.getCell(1).dataValidation = { type: 'list', allowBlank: true, formulae: ["'✨ 내 니케 데이터'!$A$2:$A$300"] };
-            for (let cNum = 2; cNum <= 11; cNum++) r.getCell(cNum).value = { formula: `=IFERROR(VLOOKUP(A${rowNum}, '✨ 내 니케 데이터'!A:K, ${cNum}, FALSE), "-")` };
+            const r = wsCalc.addRow(['(キャラクター名を選択してください)', '', '', '', '', '', '', '', '', '', '']);
+            r.getCell(1).dataValidation = { type: 'list', allowBlank: true, formulae: ["'✨ マイニケデータ'!$A$2:$A$300"] };
+            for (let cNum = 2; cNum <= 11; cNum++) r.getCell(cNum).value = { formula: `=IFERROR(VLOOKUP(A${rowNum}, '✨ マイニケデータ'!A:K, ${cNum}, FALSE), "-")` };
             r.eachCell(c => c.alignment = { horizontal: 'center', vertical: 'middle' });
         }
         wsMyData.getRow(1).eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF3F51B5' } }; c.font = { color: { argb: 'FFFFFFFF' }, bold: true }; c.alignment = { horizontal: 'center' }; });
@@ -268,17 +309,17 @@
                             const cId = char.name_code || chunk[0]; 
                             const mInfo = mainDB[cId] || {};
                             
-                            let rawName = mInfo.name_localkey || `알수없는니케(${cId})`;
-                            if (rawName === "라피 : 레드후드") rawName = "라피 : 레드 후드";
-                            if (rawName === "레드후드") rawName = "레드 후드";
+                            let rawName = mInfo.name_localkey || `Unknown Nikke(${cId})`;
+                            if (rawName === "ラピ：レッドフード") rawName = "ラピ：レッド フード";
+                            if (rawName === "レッドフード") rawName = "レッド フード";
                             const cName = rawName;
 
                             const cls = (mInfo.class || "Attacker").toUpperCase(); const corp = (mInfo.corporation || "ELYSION").toUpperCase();
                             const sId = mInfo.stat_enhance_id || 0; const grw = growthDB[sId] || null;
                             const gr = char.grade || 0; const co = char.core || 0;
-                            let brkStr = (co > 0) ? ((co === 7) ? "풀코" : `${co}코강`) : ((gr === 3) ? "풀돌" : (gr === 0 ? "명함" : `${gr}돌`));
+                            let brkStr = (co > 0) ? ((co === 7) ? "完凸" : `コア${co}`) : ((gr === 3) ? "3凸" : (gr === 0 ? "無凸" : `${gr}凸`));
                             const rLv = charLevelMap[cId] || 1; 
-                            let lvStatusStr = (rLv === synLevel) ? "싱크로" : String(rLv);
+                            let lvStatusStr = (rLv === synLevel) ? "シンクロ" : String(rLv);
                             const skStr = `${char.skill1_lv || 1}/${char.skill2_lv || 1}/${char.ulti_skill_lv || 1}`;
                             const eqStr = `${char.head_equip_lv || 0}/${char.arm_equip_lv || 0}/${char.torso_equip_lv || 0}/${char.leg_equip_lv || 0}`;
                             const aLv = char.attractive_lv || char.attractive_level || char.attractive_stat_lv || char.likability_lv || 1;
@@ -311,7 +352,7 @@
                             }
                             
                             let colHp = 0, colAtk = 0, colDef = 0, colCo = 0; const fTid = char.favorite_item_tid || 0; const fLv = char.favorite_item_lv || 0; let fGr = "None"; let favStr = "-";
-                            if (fTid) { if (String(fTid).startsWith("2")) { fGr = "Favorite"; favStr = `애장품 ${fLv}단계`; } else if (String(fTid).startsWith("100")) { fGr = String(fTid).charAt(5) === "1" ? "R" : "SR"; favStr = `${fGr}등급 ${fLv}레벨`; } }
+                            if (fTid) { if (String(fTid).startsWith("2")) { fGr = "Favorite"; favStr = `愛蔵品 ${fLv}段階`; } else if (String(fTid).startsWith("100")) { fGr = String(fTid).charAt(5) === "1" ? "R" : "SR"; favStr = `${fGr}等級 ${fLv}レベル`; } }
                             if (fLv > 0) {
                                 let cItm = fGr === "R" ? colRData : (fGr === "SR" || fGr === "Favorite" ? colSRData : null);
                                 if (cItm?.hp) {
