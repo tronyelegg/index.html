@@ -216,7 +216,7 @@
         if (!areaId) {
             for (const ta of [81, 82, 83, 84, 85, 86]) {
                 try {
-                    const res = await fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: ta, name_codes: [5167] }), credentials: "include" });
+                    const res = await fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: ta, name_codes: [3001] }), credentials: "include" });
                     const data = await res.json();
                     if (data.code === 0) { areaId = ta; break; }
                 } catch (e) {}
