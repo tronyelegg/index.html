@@ -14,6 +14,8 @@
             btnWeb: '🚀 1. 스펙 빌더로 자동 전송',
             btnJson: '🔒 2. JSON 저장 후 사이트로 이동',
             btnExcel: '📊 3. 엑셀(EXCEL) 파일로 저장',
+            btnChangeServer: '🔄 4. 다른 서버 정보 불러오기',
+            serverSelectTitle: '🌐 정보를 불러올 서버를 선택하세요',
             msgBlocked: '🚨 팝업 차단이 감지되었습니다.',
             msgFindOpenId: 'OpenID를 자동으로 찾는 중...',
             msgNoOpenId: '🚨 비공개 계정이거나 OpenID를 찾을 수 없습니다.',
@@ -32,6 +34,8 @@
             btnWeb: '🚀 1. Auto-send to Spec Builder',
             btnJson: '🔒 2. Save JSON & Go to Site',
             btnExcel: '📊 3. Save as Excel file',
+            btnChangeServer: '🔄 4. Load from Another Server',
+            serverSelectTitle: '🌐 Select a server to load data',
             msgBlocked: '🚨 Popup blocker detected.',
             msgFindOpenId: 'Automatically finding OpenID...',
             msgNoOpenId: '🚨 Private account or OpenID not found.',
@@ -50,6 +54,8 @@
             btnWeb: '🚀 1. スペックビルダーへ自動送信',
             btnJson: '🔒 2. JSON保存後にサイトへ移動',
             btnExcel: '📊 3. Excelファイルとして保存',
+            btnChangeServer: '🔄 4. 別のサーバー情報を読み込む',
+            serverSelectTitle: '🌐 読み込むサーバーを選択してください',
             msgBlocked: '🚨 ポップアップブロックを検出しました。',
             msgFindOpenId: 'OpenIDを自動検索中...',
             msgNoOpenId: '🚨 非公開アカウント、またはOpenIDが見つかりません。',
@@ -63,7 +69,6 @@
     };
     const t = (key) => i18n[lang][key];
     
-    // 💡 T.RONY 다크 테크웨어 테마 (폰트 변경 및 약어 제거)
     const ui = {
         create: function() {
             const overlay = document.createElement('div');
@@ -99,16 +104,21 @@
             const el = document.getElementById('nikke-status-text');
             if (el) el.innerText = text;
         },
-        finish: function(payload, excelBuffer, nickname) {
+        finish: function(payload, excelBuffer, nickname, serverName) {
             const el = document.getElementById('nikke-status-text');
             if (!el) return;
+            
+            // 💡 현재 불러온 서버명과 4번 버튼 추가
             el.innerHTML = `
                 <div style="font-size: 16px; font-weight: bold; margin-bottom: 5px; color: #00E676;">${t('successTitle')}</div>
+                <div style="font-size: 14px; font-weight: bold; color: #FFEB3B; margin-bottom: 5px; text-shadow: 0 0 8px rgba(255, 235, 59, 0.5);">[ 연결된 서버 : ${serverName} ]</div>
                 <div style="font-size: 13px; color: #a6accd; margin-bottom: 20px;">${t('successDesc')}</div>
                 <button id="btn-web" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #3F51B5; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnWeb')}</button>
                 <button id="btn-json" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 10px; background: #00897B; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnJson')}</button>
                 <button id="btn-excel" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 15px; background: #2E7D32; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnExcel')}</button>
+                <button id="btn-change-server" onmouseover="this.style.filter='brightness(1.2)'" onmouseout="this.style.filter='brightness(1)'" style="width: 100%; padding: 14px; margin-bottom: 15px; background: #FF9800; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s;">${t('btnChangeServer')}</button>
             `;
+            
             document.getElementById('btn-web').onclick = () => {
                 const newWin = window.open("https://tronyelegg.github.io/index.html", "_blank");
                 if (newWin) { setTimeout(() => { newWin.postMessage({ type: 'NIKKE_SPEC_DATA', payload: payload }, "*"); }, 2500); } 
@@ -117,18 +127,52 @@
             document.getElementById('btn-json').onclick = () => {
                 const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                a.download = `TRONY_Data_${nickname}.json`; a.click();
+                a.download = `TRONY_${serverName}_${nickname}.json`; a.click();
                 URL.revokeObjectURL(a.href);
                 setTimeout(() => window.open("https://tronyelegg.github.io/index.html", "_blank"), 500);
             };
             document.getElementById('btn-excel').onclick = () => {
                 const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
                 const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-                a.download = `TRONY_Dashboard_${nickname}.xlsx`; a.click();
+                a.download = `TRONY_${serverName}_${nickname}.xlsx`; a.click();
                 URL.revokeObjectURL(a.href);
             };
+            document.getElementById('btn-change-server').onclick = () => {
+                ui.showServerSelection();
+            };
+            
             const closeBtn = document.getElementById('nikke-close-btn');
             if (closeBtn) closeBtn.style.display = 'block';
+        },
+        showServerSelection: function() {
+            const el = document.getElementById('nikke-status-text');
+            if (!el) return;
+            
+            // 💡 서버 선택창 UI 렌더링
+            el.innerHTML = `
+                <div style="font-size: 16px; font-weight: bold; margin-bottom: 20px; color: #00E676;">${t('serverSelectTitle')}</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                    <button class="server-btn" data-id="83" style="padding: 12px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">Korea</button>
+                    <button class="server-btn" data-id="81" style="padding: 12px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">Japan</button>
+                    <button class="server-btn" data-id="84" style="padding: 12px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">Global</button>
+                    <button class="server-btn" data-id="82" style="padding: 12px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">NA</button>
+                    <button class="server-btn" data-id="85" style="padding: 12px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">SEA</button>
+                    <button class="server-btn" data-id="86" style="padding: 12px; background: #2c3e50; color: white; border: 1px solid #34495e; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;">Taiwan(TW)</button>
+                </div>
+            `;
+            
+            document.querySelectorAll('.server-btn').forEach(btn => {
+                btn.onmouseover = () => btn.style.background = '#34495e';
+                btn.onmouseout = () => btn.style.background = '#2c3e50';
+                btn.onclick = () => {
+                    const selectedArea = parseInt(btn.getAttribute('data-id'));
+                    const closeBtn = document.getElementById('nikke-close-btn');
+                    if (closeBtn) closeBtn.style.display = 'none'; // 통신 중에는 닫기 버튼 숨김
+                    
+                    // 선택한 서버 ID로 메인 로직 재실행!
+                    runMainLogic(selectedArea); 
+                };
+            });
         }
     };
     ui.create();
@@ -167,7 +211,8 @@
         return targetId;
     }
 
-    async function runMainLogic() {
+    // 💡 forcedAreaId 파라미터 추가 (기본값은 null)
+    async function runMainLogic(forcedAreaId = null) {
         ui.update(t('msgFindOpenId'));
         let targetId = await huntOpenIdAutomated();
         if (!targetId) { ui.update(t('msgNoOpenId')); return; }
@@ -177,56 +222,54 @@
         let activeUid = null;
         let foundMethod = "";
 
-        // =========================================================================
-        // [1단계] 서버(Area ID)와 UID 탐색 (Plan A -> Plan B)
-        // =========================================================================
-        
-        // 🟢 Plan A: 개편된 화면(DOM)에서 직관적으로 텍스트 긁어오기 (Korea, Japan 등 풀네임 대응)
-        const domText = document.body.innerText;
-        const serverMatch = domText.match(/(Global|KR|Korea|JP|Japan|NA|North America|SEA|Southeast Asia|TW|Taiwan|글로벌|한국|일본|북미|동남아|대만|グローバル|韓国|日本|北米|台湾)[\s\n]*UID[\s\n]*[:：]?[\s\n]*(\d+)/i);
-        
-        const sMap = { 
-            "JP":81, "JAPAN":81, "일본":81, "日本":81, 
-            "NA":82, "NORTH AMERICA":82, "북미":82, "北米":82, 
-            "KR":83, "KOREA":83, "한국":83, "韓国":83, 
-            "GLOBAL":84, "글로벌":84, "グローバル":84, 
-            "SEA":85, "SOUTHEAST ASIA":85, "동남아":85, 
-            "TW":86, "TAIWAN":86, "대만":86, "台湾":86 
-        };
-
-        if (serverMatch) {
-            const sName = serverMatch[1].toUpperCase();
-            areaId = sMap[sName];
-            activeUid = serverMatch[2];
-            foundMethod = "Plan A (화면 스크래핑)";
-        }
-
-        // 🟡 Plan B: 화면이 찌그러지거나 숨겨져서 못 찾았다면? -> Local Storage 훔쳐오기!
-        if (!areaId) {
-            console.log("[T.RONY] Plan A 실패. Plan B (로컬 스토리지) 복구를 시도합니다.");
-            const lsArea = window.localStorage.getItem('nikke_auto_area');
-            const lsUid = window.localStorage.getItem('nikke_auto_uid');
+        if (forcedAreaId) {
+            // [강제 모드] 4번 버튼으로 서버를 강제 선택했을 때
+            areaId = forcedAreaId;
+            activeUid = "수동선택";
+            foundMethod = "수동 서버 선택";
+        } else {
+            // [자동 모드] 최초 실행 시 (Plan A -> Plan B)
+            const domText = document.body.innerText;
+            const serverMatch = domText.match(/(Global|KR|Korea|JP|Japan|NA|North America|SEA|Southeast Asia|TW|Taiwan|글로벌|한국|일본|북미|동남아|대만|グローバル|韓国|日本|北米|台湾)[\s\n]*UID[\s\n]*[:：]?[\s\n]*(\d+)/i);
             
-            if (lsArea) {
-                areaId = parseInt(lsArea, 10);
-                activeUid = lsUid || "알수없음";
-                foundMethod = "Plan B (로컬 스토리지)";
+            const sMap = { 
+                "JP":81, "JAPAN":81, "일본":81, "日本":81, 
+                "NA":82, "NORTH AMERICA":82, "북미":82, "北米":82, 
+                "KR":83, "KOREA":83, "한국":83, "韓国":83, 
+                "GLOBAL":84, "글로벌":84, "グローバル":84, 
+                "SEA":85, "SOUTHEAST ASIA":85, "동남아":85, 
+                "TW":86, "TAIWAN":86, "대만":86, "台湾":86 
+            };
+
+            if (serverMatch) {
+                const sName = serverMatch[1].toUpperCase();
+                areaId = sMap[sName];
+                activeUid = serverMatch[2];
+                foundMethod = "Plan A (화면 스크래핑)";
+            }
+
+            if (!areaId) {
+                console.log("[T.RONY] Plan A 실패. Plan B (로컬 스토리지) 복구를 시도합니다.");
+                const lsArea = window.localStorage.getItem('nikke_auto_area');
+                const lsUid = window.localStorage.getItem('nikke_auto_uid');
+                
+                if (lsArea) {
+                    areaId = parseInt(lsArea, 10);
+                    activeUid = lsUid || "알수없음";
+                    foundMethod = "Plan B (로컬 스토리지)";
+                }
             }
         }
 
-        // 🔴 최후의 보루 (둘 다 실패했을 경우의 안전장치 및 스크립트 강제 종료)
         if (!areaId) {
             ui.update(t('msgNoServer'));
             alert(t('msgNoServer'));
-            return; // ❌ 엉뚱한 NA 서버로 가는 것을 막기 위해 여기서 완벽하게 컷!
+            return; 
         }
 
         console.log(`[T.RONY] 서버 탐색 성공! [${foundMethod}] => 서버(Area): ${areaId}, UID: ${activeUid}`);
         const regionCodeMap = { 81: "JP", 82: "NA", 83: "KR", 84: "Global", 85: "SEA", 86: "TW" };
-
-        // =========================================================================
-        // [2단계] 캐릭터 정보 API 호출 및 데이터 가공 (기존 로직)
-        // =========================================================================
+        const currentServerName = regionCodeMap[areaId] || String(areaId);
 
         ui.update(t('msgSyncDB'));
         const ts = Date.now();
@@ -433,12 +476,15 @@
         const excelBuffer = await workbook.xlsx.writeBuffer();
 
         extracted.sort((a, b) => b.cp - a.cp);
-        ui.finish({ playerName: finalNickname, server: regionCodeMap[areaId] || String(areaId), synchroLevel: synLevel, characters: extracted }, excelBuffer, finalNickname);
+        
+        // 💡 4번 파라미터로 현재 불러온 서버명(currentServerName) 전달
+        ui.finish({ playerName: finalNickname, server: currentServerName, synchroLevel: synLevel, characters: extracted }, excelBuffer, finalNickname, currentServerName);
     }
 
     async function startProcess() {
         try {
             await loadScript('https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js');
+            // 최초 실행 시 파라미터 없이 실행 (자동 서버 탐색 발동)
             runMainLogic();
         } catch (e) {
             ui.update(t('msgNoExcelLib'));
