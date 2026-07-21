@@ -18,7 +18,7 @@
             msgFindOpenId: 'OpenID를 자동으로 찾는 중...',
             msgNoOpenId: '🚨 비공개 계정이거나 OpenID를 찾을 수 없습니다.',
             msgScanServer: '서버 정보를 스캔 중입니다...',
-            msgNoServer: '🚨 서버 정보를 찾지 못했습니다.\n계정 설정을 확인해주세요.',
+            msgNoServer: '🚨 서버 정보를 찾지 못했습니다.\n좌측에 프로필이 보이는 화면에서 다시 실행해주세요.',
             msgSyncDB: '게임 데이터베이스 동기화 중...',
             msgCreateExcel: '엑셀 파일 양식을 생성 중입니다...',
             msgCalcCP: '개별 전투력을 정밀 연산 중입니다...',
@@ -36,7 +36,7 @@
             msgFindOpenId: 'Automatically finding OpenID...',
             msgNoOpenId: '🚨 Private account or OpenID not found.',
             msgScanServer: 'Scanning server info...',
-            msgNoServer: '🚨 Server info not found.\nPlease check account settings.',
+            msgNoServer: '🚨 Server info not found.\nPlease run again where your profile is visible.',
             msgSyncDB: 'Synchronizing game database...',
             msgCreateExcel: 'Generating Excel template...',
             msgCalcCP: 'Calculating precise Combat Power...',
@@ -54,7 +54,7 @@
             msgFindOpenId: 'OpenIDを自動検索中...',
             msgNoOpenId: '🚨 非公開アカウント、またはOpenIDが見つかりません。',
             msgScanServer: 'サーバー情報をスキャン中...',
-            msgNoServer: '🚨 サーバー情報が見つかりません。\nアカウント設定を確認してください。',
+            msgNoServer: '🚨 サーバー情報が見つかりません。\n左側にプロフィールが表示される画面で再実行してください。',
             msgSyncDB: 'ゲームデータベースを同期中...',
             msgCreateExcel: 'Excelファイルの書式を作成中...',
             msgCalcCP: '個別戦闘力を精密計算中...',
@@ -175,56 +175,58 @@
         ui.update(t('msgScanServer'));
         let areaId = null;
         let activeUid = null;
+        let foundMethod = "";
 
-        // 💡 [완벽한 수정] 화면(DOM)에 렌더링된 진짜 서버명과 UID를 강제로 뜯어옵니다.
-        // 쿠키나 로컬 스토리지는 서버를 스위칭할 때 즉각 갱신되지 않는 버그가 있어서 무시합니다.
+        // =========================================================================
+        // [1단계] 서버(Area ID)와 UID 탐색 (Plan A -> Plan B)
+        // =========================================================================
+        
+        // 🟢 Plan A: 개편된 화면(DOM)에서 직관적으로 텍스트 긁어오기 (Korea, Japan 등 풀네임 대응)
         const domText = document.body.innerText;
+        const serverMatch = domText.match(/(Global|KR|Korea|JP|Japan|NA|North America|SEA|Southeast Asia|TW|Taiwan|글로벌|한국|일본|북미|동남아|대만|グローバル|韓国|日本|北米|台湾)[\s\n]*UID[\s\n]*[:：]?[\s\n]*(\d+)/i);
         
-        // 정규식: Global UID: 18935333 같은 형태를 찾아냅니다. (한국어/일본어 등 다국어 패턴도 모두 대응)
-        const serverMatch = domText.match(/(Global|KR|JP|NA|SEA|TW|글로벌|한국|일본|북미|동남아|대만|グローバル|韓国|日本|北米|台湾)[\s\n]*UID[\s\n]*[:：]?[\s\n]*(\d+)/i);
-        
+        const sMap = { 
+            "JP":81, "JAPAN":81, "일본":81, "日本":81, 
+            "NA":82, "NORTH AMERICA":82, "북미":82, "北米":82, 
+            "KR":83, "KOREA":83, "한국":83, "韓国":83, 
+            "GLOBAL":84, "글로벌":84, "グローバル":84, 
+            "SEA":85, "SOUTHEAST ASIA":85, "동남아":85, 
+            "TW":86, "TAIWAN":86, "대만":86, "台湾":86 
+        };
+
         if (serverMatch) {
             const sName = serverMatch[1].toUpperCase();
-            activeUid = serverMatch[2]; // 추출한 UID 백업
-            const sMap = { "JP":81, "일본":81, "日本":81, "NA":82, "북미":82, "北米":82, "KR":83, "한국":83, "韓国":83, "GLOBAL":84, "글로벌":84, "グローバル":84, "SEA":85, "동남아":85, "TW":86, "대만":86, "台湾":86 };
             areaId = sMap[sName];
-            console.log(`[T.RONY] 화면 스캔 성공! 현재 서버: ${sName}(area: ${areaId}), UID: ${activeUid}`);
+            activeUid = serverMatch[2];
+            foundMethod = "Plan A (화면 스크래핑)";
         }
 
-        // 2. 화면에 서버명은 짤려있고 UID만 보일 경우를 대비한 2차 방어선
-        if (!areaId && !activeUid) {
-            const uidOnlyMatch = domText.match(/UID[\s\n]*[:：]?[\s\n]*(\d+)/i);
-            if (uidOnlyMatch) activeUid = uidOnlyMatch[1];
-        }
-
-        // 3. 만약 서버명을 못 찾았다면, API(GetGameRoleList)를 호출하여 UID와 일치하는 서버를 찾습니다.
-        if (!areaId && activeUid) {
-            try {
-                const roleRes = await fetch("https://api.blablalink.com/api/ugc/proxy/standalonesite/User/GetGameRoleList", { 
-                    method: "POST", headers: { "Content-Type": "application/json" }, 
-                    body: JSON.stringify({ game_id: 29080, game_channelid: 131 }), credentials: "include" 
-                });
-                const roleData = await roleRes.json();
-                if (roleData?.data?.list) {
-                    const activeRole = roleData.data.list.find(r => String(r.role_id) === activeUid || String(r.uid) === activeUid);
-                    if (activeRole) areaId = activeRole.area_id;
-                }
-            } catch (e) {}
-        }
-
-        // 4. 최후의 수단: 기존의 무차별 대입(총당번) 루프
+        // 🟡 Plan B: 화면이 찌그러지거나 숨겨져서 못 찾았다면? -> Local Storage 훔쳐오기!
         if (!areaId) {
-            for (const ta of [81, 82, 83, 84, 85, 86]) {
-                try {
-                    const res = await fetch("https://api.blablalink.com/api/game/proxy/Game/GetUserCharacterDetails", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ intl_open_id: targetId, nikke_area_id: ta, name_codes: [3001] }), credentials: "include" });
-                    const data = await res.json();
-                    if (data.code === 0) { areaId = ta; break; }
-                } catch (e) {}
+            console.log("[T.RONY] Plan A 실패. Plan B (로컬 스토리지) 복구를 시도합니다.");
+            const lsArea = window.localStorage.getItem('nikke_auto_area');
+            const lsUid = window.localStorage.getItem('nikke_auto_uid');
+            
+            if (lsArea) {
+                areaId = parseInt(lsArea, 10);
+                activeUid = lsUid || "알수없음";
+                foundMethod = "Plan B (로컬 스토리지)";
             }
         }
 
-        if (!areaId) { ui.update(t('msgNoServer')); return; }
+        // 🔴 최후의 보루 (둘 다 실패했을 경우의 안전장치 및 스크립트 강제 종료)
+        if (!areaId) {
+            ui.update(t('msgNoServer'));
+            alert(t('msgNoServer'));
+            return; // ❌ 엉뚱한 NA 서버로 가는 것을 막기 위해 여기서 완벽하게 컷!
+        }
+
+        console.log(`[T.RONY] 서버 탐색 성공! [${foundMethod}] => 서버(Area): ${areaId}, UID: ${activeUid}`);
         const regionCodeMap = { 81: "JP", 82: "NA", 83: "KR", 84: "Global", 85: "SEA", 86: "TW" };
+
+        // =========================================================================
+        // [2단계] 캐릭터 정보 API 호출 및 데이터 가공 (기존 로직)
+        // =========================================================================
 
         ui.update(t('msgSyncDB'));
         const ts = Date.now();
